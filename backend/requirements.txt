@@ -1,0 +1,13 @@
+boto3
+fastapi
+httpx
+mangum
+pandas
+pydantic
+pydantic-settings
+pytest
+pytest-asyncio 
+python-dotenv
+python-json-logger
+structlog
+uvicorn
