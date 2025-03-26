@@ -210,7 +210,7 @@ async def transform_data(request: TransformRequest):
 
     # Apply the transformation
     transformed_data = apply_transformation(
-        config, input_data, request.evaluate_node_id
+        config.nodes, input_data, request.evaluate_node_id
     )
 
     # If this is a preview request, convert the result to CSV
@@ -218,7 +218,7 @@ async def transform_data(request: TransformRequest):
     if request.preview:
         preview_csv_data = convert_to_csv(transformed_data)
     return TransformDataResponse(
-        transformed_data=transformed_data,
+        transformed_data=transformed_data.to_csv(index=False),
         preview_csv_data=preview_csv_data,
     )
 
@@ -294,6 +294,9 @@ def apply_transformation(
                 f"{handle.source_node}-{handle.source_handle}": handle.target_handle
                 for handle in node.inputs
             }
+            # Drop columns that aren't mapped to outputs
+            columns_to_keep = list(inputs.keys())
+            df = df[columns_to_keep]
             df.rename(columns=inputs, inplace=True)
 
         else:

@@ -1,6 +1,8 @@
 import os
 from typing import Dict, Any
 
+from app.core.config import settings
+
 # Get environment from env var (default to development)
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
@@ -14,17 +16,16 @@ def get_uvicorn_config() -> Dict[str, Any]:
     # Base configuration shared across environments
     config = {
         "app": "app.main:app",
-        "host": "0.0.0.0",
-        "port": int(os.getenv("PORT", 8000)),
+        "host": settings.HOST,
+        "port": settings.PORT,
         "workers": 1,
-        "log_level": "info",
-        "reload": False,
+        "log_level": settings.LOG_LEVEL,
+        "reload": settings.RELOAD,
     }
     
     # Environment-specific configuration
-    if ENVIRONMENT == "development":
+    if settings.is_development:
         config.update({
-            "reload": True,  # Enable hot reloading in development
             "workers": 1,    # Single worker for easier debugging
             "log_level": "debug",
         })

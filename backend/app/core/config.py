@@ -24,11 +24,20 @@ class Settings(BaseSettings):
     API_PREFIX: str = "/api"
     API_V1_PREFIX: str = "/v1"
 
+    # Server Configuration
+    HOST: str = "0.0.0.0"
+    PORT: int = 8000
+    RELOAD: bool = True
+    LOG_LEVEL: str = "info"
+
     # CORS Configuration
     CORS_ORIGINS: List[str] = ["*"]
     CORS_ALLOW_CREDENTIALS: bool = True
     CORS_ALLOW_METHODS: List[str] = ["*"]
     CORS_ALLOW_HEADERS: List[str] = ["*"]
+
+    # AWS Configuration
+    AWS_REGION: str = "eu-west-1"
 
     @property
     def is_development(self) -> bool:
@@ -40,13 +49,12 @@ class Settings(BaseSettings):
         """Check if the application is running in production mode."""
         return self.ENVIRONMENT.lower() == "production"
 
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
-
-    # class Config:
-    #     """Pydantic configuration."""
-
-    #     env_file = ".env"
-    #     case_sensitive = True
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=True,
+        extra="ignore"
+    )
 
 
 # Create a global instance of the settings

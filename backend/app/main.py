@@ -5,6 +5,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import api_router
 from app.core.config import settings
 from app.core.logger import configure_logging, get_logger
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file in parent directory
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
 
 # Configure logging first
 configure_logging()

@@ -74,6 +74,8 @@ def topological_sort(nodes: dict[str, Node]) -> list[Node]:
         sorted_nodes.append(node)
         # for each output of the node, decrement the degree of the target node
         for output_handle in node.outputs:
+            if output_handle.target not in input_nodes:
+                continue
             input_nodes[output_handle.target].degree -= 1
             # if the target node has degree 0, add it to the queue
             if input_nodes[output_handle.target].degree == 0:

@@ -210,6 +210,10 @@ class TransformRequest(BaseModel):
     limit: Optional[int] = Field(
         default=100, ge=1, le=1000, description="Number of rows to process for preview"
     )
+    source_file: Optional[str] = Field(
+        None,
+        description="Path to the source file to use for transformation. If not provided, uses the latest file from input_file_prefix_path",
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -217,7 +221,7 @@ class TransformRequest(BaseModel):
                 "config_id": "customer-data-transform-v1",
                 "evaluate_node_id": "output-1",
                 "preview": True,
-                "limit": 10
+                "limit": 10,
             }
         }
     )
@@ -232,7 +236,7 @@ class PreviewResponse(BaseModel):
 class TransformDataResponse(BaseModel):
     """Response model for transformed data."""
 
-    transformed_data: List[Dict[str, Any]]
+    transformed_data: str
     preview_csv_data: Optional[str] = Field(
         None, description="Base64 encoded CSV data, only present in preview mode"
     )

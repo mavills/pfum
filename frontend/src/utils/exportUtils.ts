@@ -1,23 +1,23 @@
-import { CustomNode, CustomEdge } from '../types';
-import { 
-  NodeType, 
-  NodeData, 
-  InputNodeData, 
-  OutputNodeData, 
-  StringConcatNodeData 
-} from '../types';
+import { CustomNode, CustomEdge } from "../types";
+import {
+  NodeType,
+  InputNodeData,
+  OutputNodeData,
+  StringConcatNodeData,
+} from "../types";
 
 /**
  * Processes inputs for a node by filtering edges targeting this node
  */
 function processNodeInputs(nodeId: string, edges: CustomEdge[]) {
   return edges
-    .filter(edge => edge.target === nodeId)
-    .map(edge => ({
+    .filter((edge) => edge.target === nodeId)
+    .map((edge) => ({
       id: edge.id,
-      sourceNode: edge.source,
-      sourceHandle: edge.sourceHandle,
-      targetHandle: edge.targetHandle,
+      source_node: edge.source,
+      source_handle: edge.sourceHandle,
+      target: edge.target,
+      target_handle: edge.targetHandle,
     }));
 }
 
@@ -26,12 +26,13 @@ function processNodeInputs(nodeId: string, edges: CustomEdge[]) {
  */
 function processNodeOutputs(nodeId: string, edges: CustomEdge[]) {
   return edges
-    .filter(edge => edge.source === nodeId)
-    .map(edge => ({
+    .filter((edge) => edge.source === nodeId)
+    .map((edge) => ({
       id: edge.id,
-      sourceHandle: edge.sourceHandle,
+      source_node: edge.source,
+      source_handle: edge.sourceHandle,
       target: edge.target,
-      targetHandle: edge.targetHandle,
+      target_handle: edge.targetHandle,
     }));
 }
 
@@ -43,19 +44,22 @@ function getNodeManualValues(node: CustomNode) {
     case NodeType.INPUT: {
       const inputData = node.data as InputNodeData;
       return {
-        columnNames: inputData.columnNames || [],
+        column_names: inputData.column_names || [],
       };
     }
     case NodeType.OUTPUT: {
       const outputData = node.data as OutputNodeData;
       return {
-        entityType: outputData.entityType,
+        entity_type: outputData.entity_type,
+        field_values: outputData.field_values || {},
       };
     }
     case NodeType.STRING_CONCAT: {
       const stringConcatData = node.data as StringConcatNodeData;
       return {
         separator: stringConcatData.separator,
+        input_1: stringConcatData.input_1 || "",
+        input_2: stringConcatData.input_2 || "",
       };
     }
     default:
@@ -67,34 +71,40 @@ function getNodeManualValues(node: CustomNode) {
  * Transforms the nodes and edges data into a structured JSON configuration
  * that can be exported and later imported
  */
-export function generateConfigJSON(nodes: CustomNode[], edges: CustomEdge[]): string {
+export function generateConfigJSON(
+  nodes: CustomNode[],
+  edges: CustomEdge[]
+): string {
   // Create a map of nodes by ID for quick lookup
   const nodesMap = new Map<string, CustomNode>();
-  nodes.forEach(node => nodesMap.set(node.id, node));
-  
+  nodes.forEach((node) => nodesMap.set(node.id, node));
+
   // Process each node with a generalized structure
-  const processedNodes = nodes.map(node => ({
+  const processedNodes = nodes.map((node) => ({
     id: node.id,
     type: node.type,
-    position: node.position,
+    position: {
+      x: node.position.x,
+      y: node.position.y,
+    },
     manual_values: getNodeManualValues(node),
     inputs: processNodeInputs(node.id, edges),
     outputs: processNodeOutputs(node.id, edges),
   }));
-  
+
   // Create the final configuration object
   const config = {
     version: "1.0",
     nodes: processedNodes,
-    edges: edges.map(edge => ({
+    edges: edges.map((edge) => ({
       id: edge.id,
       source: edge.source,
-      sourceHandle: edge.sourceHandle,
+      source_handle: edge.sourceHandle,
       target: edge.target,
-      targetHandle: edge.targetHandle,
+      target_handle: edge.targetHandle,
     })),
   };
-  
+
   return JSON.stringify(config, null, 2);
 }
 
@@ -104,12 +114,12 @@ export function generateConfigJSON(nodes: CustomNode[], edges: CustomEdge[]): st
 export function validateConfigJSON(jsonString: string): boolean {
   try {
     const config = JSON.parse(jsonString);
-    
+
     // Basic validation
     if (!config.version || !config.nodes || !Array.isArray(config.nodes)) {
       return false;
     }
-    
+
     return true;
   } catch (error) {
     return false;

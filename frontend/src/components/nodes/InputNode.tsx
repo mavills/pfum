@@ -10,7 +10,7 @@ import { NodeButton, InputNodeRow } from './components';
 const InputNode: React.FC<NodeProps> = ({ data, id }) => {
   const nodeData = data as InputNodeData;
   const [newColumnName, setNewColumnName] = useState('');
-  const [columnNames, setColumnNames] = useState<string[]>(nodeData?.columnNames || []);
+  const [columnNames, setColumnNames] = useState<string[]>(nodeData?.column_names || []);
 
   const addColumnName = useCallback(() => {
     // if (newColumnName.trim() !== '') {
@@ -18,7 +18,7 @@ const InputNode: React.FC<NodeProps> = ({ data, id }) => {
       setColumnNames(updatedColumnNames);
       // Update node data
       if (nodeData) {
-        nodeData.columnNames = updatedColumnNames;
+        nodeData.column_names = updatedColumnNames;
       }
       setNewColumnName('');
     // }
@@ -29,7 +29,7 @@ const InputNode: React.FC<NodeProps> = ({ data, id }) => {
     setColumnNames(updatedColumnNames);
     // Update node data
     if (nodeData) {
-      nodeData.columnNames = updatedColumnNames;
+      nodeData.column_names = updatedColumnNames;
     }
   }, [columnNames, nodeData]);
 
@@ -39,7 +39,7 @@ const InputNode: React.FC<NodeProps> = ({ data, id }) => {
     setColumnNames(updatedColumnNames);
     // Update node data
     if (nodeData) {
-      nodeData.columnNames = updatedColumnNames;
+      nodeData.column_names = updatedColumnNames;
     }
   }, [columnNames, nodeData]);
 

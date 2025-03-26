@@ -1,12 +1,11 @@
-import { Node as XYNode, Edge as XYEdge } from '@xyflow/react';
-
-export type CustomNode = XYNode;
-export type CustomEdge = XYEdge;
+// Define our own simplified types for ReactFlow compatibility
+export type CustomNode = any;
+export type CustomEdge = any;
 
 export enum NodeType {
   INPUT = 'input',
   OUTPUT = 'output',
-  STRING_CONCAT = 'stringConcat',
+  STRING_CONCAT = 'string_concat',
 }
 
 export interface BaseNodeData {
@@ -15,19 +14,21 @@ export interface BaseNodeData {
 
 export interface InputNodeData extends BaseNodeData {
   type: NodeType.INPUT;
-  columnNames: string[];
+  column_names: string[];
+  source_file?: string; // S3 file path for the input data
 }
 
 export interface OutputNodeData extends BaseNodeData {
   type: NodeType.OUTPUT;
-  entityType: EntityType;
-  fieldValues: Record<string, string>;
+  entity_type: EntityType;
+  field_values: Record<string, string>;
 }
 
 export interface StringConcatNodeData extends BaseNodeData {
   type: NodeType.STRING_CONCAT;
   separator: string;
-  inputValues: Record<string, string>;
+  input_1: string;
+  input_2: string;
 }
 
 export enum EntityType {
@@ -38,5 +39,5 @@ export enum EntityType {
 export type RFState = {
   nodes: CustomNode[];
   edges: CustomEdge[];
-  nodeTypes: NodeTypes;
+  node_types: Record<string, any>;
 }; 

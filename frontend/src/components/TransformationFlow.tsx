@@ -15,8 +15,9 @@ import StringConcatNode from './nodes/StringConcatNode';
 import ContextMenu from './panels/ContextMenu';
 import PreviewPanel from './panels/PreviewPanel';
 import ExportConfigPanel from './panels/ExportConfigPanel';
+import S3ExplorerPanel from './panels/S3ExplorerPanel';
 import { createNode, isValidConnection } from '../utils/nodeUtils';
-import { NodeType } from '../types';
+import { NodeType, InputNodeData } from '../types';
 
 // Define node types mapping
 const nodeTypes: NodeTypes = {
@@ -55,11 +56,12 @@ const FlowContent: React.FC = () => {
     y: 0,
   });
 
-  // Preview panel state
+  // Panel states
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  
-  // Export config panel state
   const [isExportOpen, setIsExportOpen] = useState(false);
+  
+  // S3 Explorer panel state
+  const [isS3ExplorerOpen, setIsS3ExplorerOpen] = useState(true);
 
   const reactFlowInstance = useReactFlow();
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
@@ -157,6 +159,34 @@ const FlowContent: React.FC = () => {
     setNodes((nds) => [...nds, newNode]);
   }, []);
 
+  // Add input node from S3 file
+  const onAddInputNodeFromS3 = useCallback((columnNames: string[], sourceFile: string) => {
+    // Create a new input node with column data from the S3 file
+    const position = { x: 100, y: 100 };
+    
+    // If there are existing nodes, position the new node at the top left
+    if (nodes.length > 0) {
+      const minX = Math.min(...nodes.map(node => node.position.x)) - 300;
+      const minY = Math.min(...nodes.map(node => node.position.y));
+      position.x = minX > 50 ? minX : 50;
+      position.y = minY;
+    }
+    
+    // Create the input node with column names
+    const newNode = createNode(NodeType.INPUT, position);
+    
+    // Update the node data with column names and source file
+    const nodeData = newNode.data as InputNodeData;
+    nodeData.column_names = columnNames;
+    nodeData.source_file = sourceFile;
+    
+    // Add the new node to the flow
+    setNodes((nds) => [...nds, newNode]);
+    
+    // Show a notification
+    setShowNotification(true);
+  }, [nodes]);
+
   // Handle keyboard events for deleting edges
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -178,110 +208,127 @@ const FlowContent: React.FC = () => {
     };
   }, [selectedEdge]);
 
+  // Calculate the ReactFlow wrapper class based on whether S3 Explorer is open
+  const reactFlowWrapperClass = isS3ExplorerOpen 
+    ? "flex-1 ml-72" // With S3 Explorer open (width: 18rem = 72)
+    : "flex-1";      // Without S3 Explorer
+    
   return (
-    <div style={{ width: '100%', height: '100vh' }} ref={reactFlowWrapper}>
-      {/* Feature notification */}
-      {showNotification && (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white py-2 px-4 rounded-lg shadow-lg z-50 flex items-center space-x-2 animate-fade-in">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-          </svg>
-          <div>
-            <span className="font-bold">New Feature:</span> Click on a connection line to select it, then press Delete or Backspace to remove it.
-            <button 
-              className="ml-3 text-white underline focus:outline-none" 
-              onClick={() => setShowNotification(false)}
-            >
-              Dismiss
-            </button>
-          </div>
+    <div className="flex flex-row h-screen">
+      {/* S3 Explorer Panel */}
+      {isS3ExplorerOpen && (
+        <div className="w-72 h-full border-r border-gray-200 fixed left-0 top-0 z-10">
+          <S3ExplorerPanel onAddInputNode={onAddInputNodeFromS3} />
         </div>
       )}
       
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onEdgeClick={onEdgeClick}
-        onPaneClick={onPaneClick}
-        onPaneContextMenu={onPaneContextMenu}
-        nodeTypes={nodeTypes}
-        fitView
-        edgesFocusable={true}
-        selectNodesOnDrag={false}
-      >
-        <Background 
-          color="#aaa" 
-          gap={16} 
-          size={1} 
-        />
-        <Controls />
+      <div className={reactFlowWrapperClass} ref={reactFlowWrapper}>
+        {/* Feature notification */}
+        {showNotification && (
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white py-2 px-4 rounded-lg shadow-lg z-50 flex items-center space-x-2 animate-fade-in">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+            <div>
+              <span className="font-bold">New Feature:</span> Click on a connection line to select it, then press Delete or Backspace to remove it.
+              <button 
+                className="ml-3 text-white underline focus:outline-none" 
+                onClick={() => setShowNotification(false)}
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
         
-        {contextMenu.show && (
-          <ContextMenu
-            x={contextMenu.x}
-            y={contextMenu.y}
-            onClose={() => setContextMenu({ ...contextMenu, show: false })}
-            onAddNode={onAddNode}
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onEdgeClick={onEdgeClick}
+          onPaneClick={onPaneClick}
+          onPaneContextMenu={onPaneContextMenu}
+          nodeTypes={nodeTypes}
+          fitView
+          edgesFocusable={true}
+          selectNodesOnDrag={false}
+        >
+          <Background 
+            color="#aaa" 
+            gap={16} 
+            size={1} 
+          />
+          <Controls />
+          
+          {contextMenu.show && (
+            <ContextMenu
+              x={contextMenu.x}
+              y={contextMenu.y}
+              onClose={() => setContextMenu({ ...contextMenu, show: false })}
+              onAddNode={onAddNode}
+            />
+          )}
+          
+          <Panel position="top-left" className="bg-white p-3 rounded-md shadow-md">
+            <h3 className="text-lg font-bold mb-2">CSV Transformation Editor</h3>
+            <p className="text-sm text-gray-600">Right-click to add nodes</p>
+          </Panel>
+
+          <Panel position="top-right" className="bg-white p-3 rounded-md shadow-md flex gap-3">
+            <button 
+              className="primary-button"
+              onClick={() => setIsPreviewOpen(true)}
+            >
+              Preview Transformation
+            </button>
+            <button 
+              className="secondary-button"
+              onClick={() => setIsExportOpen(true)}
+            >
+              Export Config
+            </button>
+            <button 
+              className="secondary-button"
+              onClick={() => setIsS3ExplorerOpen(!isS3ExplorerOpen)}
+            >
+              {isS3ExplorerOpen ? 'Hide S3 Explorer' : 'Show S3 Explorer'}
+            </button>
+            {selectedEdge && (
+              <button 
+                className="destructive-button"
+                onClick={() => {
+                  setEdges((eds) => eds.filter((edge) => edge.id !== selectedEdge));
+                  setSelectedEdge(null);
+                }}
+              >
+                Delete Connection
+              </button>
+            )}
+          </Panel>
+        </ReactFlow>
+        
+        {/* Preview Panel */}
+        {isPreviewOpen && (
+          <PreviewPanel 
+            onClose={() => setIsPreviewOpen(false)}
+            nodes={nodes}
+            edges={edges}
           />
         )}
         
-        <Panel position="top-left" className="bg-white p-3 rounded-md shadow-md">
-          <h3 className="text-lg font-bold mb-2">CSV Transformation Editor</h3>
-          <p className="text-sm text-gray-600">Right-click to add nodes</p>
-        </Panel>
-
-        <Panel position="top-right" className="bg-white p-3 rounded-md shadow-md flex gap-3">
-          <button 
-            className="primary-button"
-            onClick={() => setIsPreviewOpen(true)}
-          >
-            Preview Transformation
-          </button>
-          <button 
-            className="secondary-button"
-            onClick={() => setIsExportOpen(true)}
-          >
-            Export Config
-          </button>
-          {selectedEdge && (
-            <button 
-              className="bg-red-500 text-white px-3 py-2 rounded text-sm hover:bg-red-600 transition-colors"
-              onClick={() => {
-                setEdges((eds) => eds.filter((edge) => edge.id !== selectedEdge));
-                setSelectedEdge(null);
-              }}
-            >
-              Delete Connection
-            </button>
-          )}
-        </Panel>
-
-        {/* User instruction overlay when edge is selected */}
-        {selectedEdge && (
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 text-white py-2 px-4 rounded-md text-sm">
-            Press Delete or Backspace to remove the selected connection
-          </div>
+        {/* Export Config Panel */}
+        {isExportOpen && (
+          <ExportConfigPanel 
+            onClose={() => setIsExportOpen(false)}
+            nodes={nodes}
+            edges={edges}
+          />
         )}
-      </ReactFlow>
-
-      <PreviewPanel 
-        nodes={nodes}
-        edges={edges}
-        isOpen={isPreviewOpen}
-        onClose={() => setIsPreviewOpen(false)}
-      />
-      
-      <ExportConfigPanel
-        nodes={nodes}
-        edges={edges}
-        isOpen={isExportOpen}
-        onClose={() => setIsExportOpen(false)}
-      />
+      </div>
     </div>
   );
 };
 
-export default FlowWithProvider; 
+export default FlowWithProvider;
