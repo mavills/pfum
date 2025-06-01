@@ -3,43 +3,40 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { 
   ReactFlowProvider,
-  ReactFlow,
+  ReactFlow, 
   Background, 
   Controls, 
   Panel,
-  Connection, 
-  Node, 
-  Edge, 
-  NodeTypes,
-  NodeChange, 
-  EdgeChange, 
-  applyNodeChanges, 
-  applyEdgeChanges,
-  useReactFlow
+  useNodesState, 
+  useEdgesState,
+  useReactFlow,
+  Node,
+  Edge
 } from '@xyflow/react';
-import '@xyflow/react/dist/base.css';
+import '@xyflow/react/dist/style.css';
 
+// Components
 import InputNode from './nodes/InputNode';
 import OutputNode from './nodes/OutputNode';
 import StringConcatNode from './nodes/StringConcatNode';
 import DynamicNode from './nodes/DynamicNode';
+import ConfigurationPanel from './panels/ConfigurationPanel';
 import PreviewPanel from './panels/PreviewPanel';
 import ExportConfigPanel from './panels/ExportConfigPanel';
-import S3ExplorerPanel from './panels/S3ExplorerPanel';
-import NodePalette from './panels/NodePalette';
-import { createNode, isValidConnection, createDynamicNode } from '../utils/nodeUtils';
-import { NodeType, InputNodeData } from '../types';
-import { initializeDefaultConfigurations } from '../services/nodeConfigService';
 
-// Define node types mapping
-const nodeTypes: NodeTypes = {
-  [NodeType.INPUT]: InputNode,
-  [NodeType.OUTPUT]: OutputNode,
-  [NodeType.STRING_CONCAT]: StringConcatNode,
-  [NodeType.DYNAMIC]: DynamicNode,
+// Types and utilities
+import { NodeType, InputNodeData } from '../types';
+import { createNode, createDynamicNode } from '../utils/nodeUtils';
+
+const nodeTypes = {
+  input: InputNode,
+  output: OutputNode,
+  string_concat: StringConcatNode,
+  dynamic: DynamicNode,
 };
 
-const FlowWithProvider: React.FC = () => {
+// Main wrapper component with ReactFlowProvider
+const TransformationFlow: React.FC = () => {
   return (
     <ReactFlowProvider>
       <FlowContent />
@@ -47,87 +44,39 @@ const FlowWithProvider: React.FC = () => {
   );
 };
 
+// FlowContent component (the main flow logic)
 const FlowContent: React.FC = () => {
   // State for nodes and edges
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [edges, setEdges] = useState<Edge[]>([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   
-  // State for selected elements
-  const [selectedEdge, setSelectedEdge] = useState<string | null>(null);
-  
-  // Notification state
-  const [showNotification, setShowNotification] = useState(true);
-  
-  // Panel states
+  // UI state
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
-  
-  // S3 Explorer panel state
   const [isS3ExplorerOpen, setIsS3ExplorerOpen] = useState(true);
+  const [selectedEdge, setSelectedEdge] = useState<string | null>(null);
+  const [showNotification, setShowNotification] = useState(true);
 
   // ReactFlow hooks
-  const reactFlow = useReactFlow();
+  const { screenToFlowPosition } = useReactFlow();
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  
-  // Initialize node configurations on mount
-  useEffect(() => {
-    initializeDefaultConfigurations();
-  }, []);
 
-  // Hide notification after 5 seconds
-  useEffect(() => {
-    if (showNotification) {
-      const timer = setTimeout(() => {
-        setShowNotification(false);
-      }, 5000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [showNotification]);
-
-  // Handle node changes
-  const onNodesChange = useCallback(
-    (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
-    []
-  );
-
-  // Handle edge changes
-  const onEdgesChange = useCallback(
-    (changes: EdgeChange[]) => {
-      // Clear selected edge if it's being removed
-      changes.forEach(change => {
-        if (change.type === 'remove' && change.id === selectedEdge) {
-          setSelectedEdge(null);
-        }
-      });
-      setEdges((eds) => applyEdgeChanges(changes, eds));
-    },
-    [selectedEdge]
-  );
-
-  // Handle new connections
-  const onConnect = useCallback(
-    (connection: Connection) => {
-      const sourceNode = nodes.find(node => node.id === connection.source);
-      const targetNode = nodes.find(node => node.id === connection.target);
-      
-      if (isValidConnection(connection.sourceHandle, connection.targetHandle, sourceNode, targetNode)) {
-        const newEdge = {
-          id: `edge-${connection.source}-${connection.sourceHandle}-${connection.target}-${connection.targetHandle}`,
-          source: connection.source || '',
-          target: connection.target || '',
-          sourceHandle: connection.sourceHandle,
-          targetHandle: connection.targetHandle,
-          animated: false,
-        };
-        
-        setEdges((eds) => [...eds, newEdge]);
-        // Select the newly created edge
-        setSelectedEdge(newEdge.id);
-      }
-    },
-    [nodes]
-  );
+  // Handle connections between nodes
+  const onConnect = useCallback((params: any) => {
+    const edgeId = `edge-${params.source}-${params.sourceHandle}-${params.target}-${params.targetHandle}`;
+    
+    const newEdge: Edge = {
+      id: edgeId,
+      source: params.source,
+      target: params.target,
+      sourceHandle: params.sourceHandle,
+      targetHandle: params.targetHandle,
+      animated: false,
+      style: { strokeWidth: 2 },
+    };
+    
+    setEdges((eds) => [...eds, newEdge]);
+  }, [setEdges]);
 
   // Handle edge selection
   const onEdgeClick = useCallback((event: React.MouseEvent, edge: Edge) => {
@@ -135,26 +84,9 @@ const FlowContent: React.FC = () => {
     setSelectedEdge(edge.id);
   }, []);
 
-  // Handle canvas click to deselect edges
+  // Handle pane click to deselect
   const onPaneClick = useCallback(() => {
     setSelectedEdge(null);
-  }, []);
-
-  // Add a new node from drag and drop
-  const onAddNode = useCallback((type: NodeType, position: { x: number; y: number }) => {
-    const newNode = createNode(type, position);
-    setNodes((nds) => [...nds, newNode]);
-  }, []);
-
-  // Add a dynamic node from drag and drop
-  const onAddDynamicNode = useCallback((configId: string, position: { x: number; y: number }) => {
-    try {
-      const newNode = createDynamicNode(configId, position);
-      setNodes((nds) => [...nds, newNode]);
-    } catch (error) {
-      console.error('Failed to create dynamic node:', error);
-      // You could add a toast notification here
-    }
   }, []);
 
   // Drag and drop handlers
@@ -176,9 +108,9 @@ const FlowContent: React.FC = () => {
       const nodeData = JSON.parse(nodeDataStr);
       
       // Convert screen coordinates to flow coordinates
-      const position = reactFlow.screenToFlowPosition({
-        x: event.clientX - reactFlowBounds.left,
-        y: event.clientY - reactFlowBounds.top,
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
       });
 
       // Add the node based on its type
@@ -190,7 +122,23 @@ const FlowContent: React.FC = () => {
     } catch (error) {
       console.error('Error handling drop:', error);
     }
-  }, [reactFlow, onAddNode, onAddDynamicNode]);
+  }, [screenToFlowPosition]);
+
+  // Add a new node from drag and drop
+  const onAddNode = useCallback((type: NodeType, position: { x: number; y: number }) => {
+    const newNode = createNode(type, position);
+    setNodes((nds) => [...nds, newNode]);
+  }, [setNodes]);
+
+  // Add a dynamic node
+  const onAddDynamicNode = useCallback((configId: string, position: { x: number; y: number }) => {
+    try {
+      const newNode = createDynamicNode(configId, position);
+      setNodes((nds) => [...nds, newNode]);
+    } catch (error) {
+      console.error('Failed to create dynamic node:', error);
+    }
+  }, [setNodes]);
 
   // Add input node from S3 file
   const onAddInputNodeFromS3 = useCallback((columnNames: string[], sourceFile: string) => {
@@ -218,7 +166,7 @@ const FlowContent: React.FC = () => {
     
     // Show a notification
     setShowNotification(true);
-  }, [nodes]);
+  }, [nodes, setNodes]);
 
   // Handle keyboard events for deleting edges
   useEffect(() => {
@@ -239,20 +187,20 @@ const FlowContent: React.FC = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selectedEdge]);
+  }, [selectedEdge, setEdges]);
     
   return (
     <>
-      {/* S3 Explorer Sidebar */}
-      {isS3ExplorerOpen && (
-        <div className="app-sidebar">
-          <NodePalette 
-            onAddNode={onAddNode}
-            onAddDynamicNode={onAddDynamicNode}
-          />
-          <S3ExplorerPanel onAddInputNode={onAddInputNodeFromS3} />
-        </div>
-      )}
+      {/* Configuration Sidebar */}
+      <ConfigurationPanel
+        onAddNode={onAddNode}
+        onAddDynamicNode={onAddDynamicNode}
+        onAddInputNodeFromS3={onAddInputNodeFromS3}
+        onPreviewTransformation={() => setIsPreviewOpen(true)}
+        onExportConfig={() => setIsExportOpen(true)}
+        onToggleS3Explorer={() => setIsS3ExplorerOpen(!isS3ExplorerOpen)}
+        isS3ExplorerOpen={isS3ExplorerOpen}
+      />
       
       {/* Main Content Area */}
       <div className="app-main">
@@ -275,7 +223,12 @@ const FlowContent: React.FC = () => {
         )}
         
         {/* ReactFlow Viewport */}
-        <div className="app-viewport" ref={reactFlowWrapper}>
+        <div 
+          className="app-viewport" 
+          ref={reactFlowWrapper}
+          onDragOver={onDragOver}
+          onDrop={onDrop}
+        >
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -284,8 +237,6 @@ const FlowContent: React.FC = () => {
             onConnect={onConnect}
             onEdgeClick={onEdgeClick}
             onPaneClick={onPaneClick}
-            onDragOver={onDragOver}
-            onDrop={onDrop}
             nodeTypes={nodeTypes}
             fitView
             edgesFocusable={true}
@@ -303,26 +254,8 @@ const FlowContent: React.FC = () => {
               <p className="text-sm text-gray-600">Drag nodes from the sidebar to add them</p>
             </Panel>
 
-            <Panel position="top-right" className="bg-white p-3 rounded-md shadow-md flex gap-3">
-              <button 
-                className="btn btn-primary"
-                onClick={() => setIsPreviewOpen(true)}
-              >
-                Preview Transformation
-              </button>
-              <button 
-                className="btn btn-secondary"
-                onClick={() => setIsExportOpen(true)}
-              >
-                Export Config
-              </button>
-              <button 
-                className="btn btn-secondary"
-                onClick={() => setIsS3ExplorerOpen(!isS3ExplorerOpen)}
-              >
-                {isS3ExplorerOpen ? 'Hide S3 Explorer' : 'Show S3 Explorer'}
-              </button>
-              {selectedEdge && (
+            {selectedEdge && (
+              <Panel position="top-right" className="bg-white p-3 rounded-md shadow-md">
                 <button 
                   className="btn btn-destructive"
                   onClick={() => {
@@ -332,8 +265,8 @@ const FlowContent: React.FC = () => {
                 >
                   Delete Connection
                 </button>
-              )}
-            </Panel>
+              </Panel>
+            )}
           </ReactFlow>
         </div>
         
@@ -361,4 +294,4 @@ const FlowContent: React.FC = () => {
   );
 };
 
-export default FlowWithProvider;
+export default TransformationFlow;
