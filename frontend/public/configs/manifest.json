@@ -21,6 +21,13 @@
       "name": "Math Addition",
       "category": "Math Operations",
       "description": "Add two numbers together"
+    },
+    {
+      "id": "employee-output",
+      "file": "employee-output.json",
+      "name": "Employee Output",
+      "category": "Entity",
+      "description": "Output node for Employee entity with TechWolf API compatible fields"
     }
   ]
 } 
