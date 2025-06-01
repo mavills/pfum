@@ -13,7 +13,8 @@ import {
   Download,
   Search,
   X,
-  RefreshCw
+  RefreshCw,
+  Upload
 } from 'lucide-react';
 import { NodeType } from '../../types';
 import { nodeConfigService } from '../../services/nodeConfigService';
@@ -32,6 +33,7 @@ interface ConfigurationPanelProps {
   onPreviewTransformation: () => void;
   onExportConfig: () => void;
   onExportGraph: () => void;
+  onImportGraphFromClipboard: () => void;
   onToggleS3Explorer: () => void;
   isS3ExplorerOpen: boolean;
 }
@@ -156,6 +158,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
   onPreviewTransformation,
   onExportConfig,
   onExportGraph,
+  onImportGraphFromClipboard,
   onToggleS3Explorer,
   isS3ExplorerOpen
 }) => {
@@ -303,8 +306,15 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
                   className="config-action-button"
                   onClick={onExportGraph}
                 >
-                  <Download size={14} />
+                  <Upload size={14} />
                   <span>Export Graph (New Tab)</span>
+                </button>
+                <button 
+                  className="config-action-button"
+                  onClick={onImportGraphFromClipboard}
+                >
+                  <Download size={14} />
+                  <span>Import from Clipboard</span>
                 </button>
                 <button 
                   className="config-action-button"
@@ -312,7 +322,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
                   style={{ opacity: 0.7, fontSize: '11px' }}
                 >
                   <Download size={12} />
-                  <span>Legacy Export Modal</span>
+                  <span>Export (Legacy)</span>
                 </button>
                 <button 
                   className="config-action-button"

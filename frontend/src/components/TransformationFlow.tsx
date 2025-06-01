@@ -26,7 +26,7 @@ import ExportConfigPanel from './panels/ExportConfigPanel';
 import { NodeType, InputNodeData } from '../types';
 import { createNode, createDynamicNode } from '../utils/nodeUtils';
 import { loadConfigurationsFromPublicDirectory } from '../utils/configLoader';
-import { generateGraphExportJSON } from '../utils/exportUtils';
+import { generateGraphExportJSON, importGraphFromJSON } from '../utils/exportUtils';
 
 const nodeTypes = {
   input: InputNode,
@@ -247,6 +247,42 @@ const FlowContent: React.FC = () => {
     }
   }, [nodes, edges]);
 
+  // Import graph from clipboard
+  const onImportGraphFromClipboard = useCallback(async (): Promise<void> => {
+    try {
+      // Check if clipboard API is available
+      if (!navigator.clipboard || !navigator.clipboard.readText) {
+        throw new Error('Clipboard API not available in this browser');
+      }
+      
+      console.log('📋 [IMPORT] Reading from clipboard...');
+      const clipboardText = await navigator.clipboard.readText();
+      
+      if (!clipboardText.trim()) {
+        throw new Error('Clipboard is empty');
+      }
+      
+      console.log('📋 [IMPORT] Parsing graph data...');
+      const { nodes: importedNodes, edges: importedEdges } = importGraphFromJSON(clipboardText);
+      
+      // Clear current graph and set imported data
+      console.log('📋 [IMPORT] Clearing current graph and importing new data...');
+      setNodes(importedNodes);
+      setEdges(importedEdges);
+      
+      console.log(`✅ [IMPORT] Successfully imported ${importedNodes.length} nodes and ${importedEdges.length} edges`);
+      
+      // Optional: Show success notification
+      // You can add a toast notification here if you want
+      
+    } catch (error) {
+      console.error('❌ [IMPORT] Failed to import graph:', error);
+      
+      // Show error to user - you can replace this with a proper notification system
+      alert(`Failed to import graph: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }, [setNodes, setEdges]);
+
   // Handle keyboard events for deleting edges
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -278,6 +314,7 @@ const FlowContent: React.FC = () => {
         onPreviewTransformation={() => setIsPreviewOpen(true)}
         onExportConfig={() => setIsExportOpen(true)}
         onExportGraph={onExportGraph}
+        onImportGraphFromClipboard={onImportGraphFromClipboard}
         onToggleS3Explorer={() => setIsS3ExplorerOpen(!isS3ExplorerOpen)}
         isS3ExplorerOpen={isS3ExplorerOpen}
       />
