@@ -91,37 +91,81 @@ const FlowContent: React.FC = () => {
 
   // Drag and drop handlers
   const onDragOver = useCallback((event: React.DragEvent) => {
+    console.log('🔄 [DRAG-OVER] Drag over detected', {
+      clientX: event.clientX,
+      clientY: event.clientY,
+      dataTransfer: {
+        effectAllowed: event.dataTransfer.effectAllowed,
+        dropEffect: event.dataTransfer.dropEffect,
+        types: Array.from(event.dataTransfer.types)
+      }
+    });
+
     event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
+    // Match the effectAllowed from the drag source
+    event.dataTransfer.dropEffect = 'copy';
+    
+    console.log('✅ [DRAG-OVER] Drop effect set to copy');
   }, []);
 
   const onDrop = useCallback((event: React.DragEvent) => {
-    console.log('onDrop');
-    event.preventDefault();
+    console.log('🎯 [DROP] Drop event triggered!', {
+      clientX: event.clientX,
+      clientY: event.clientY,
+      dataTransfer: {
+        effectAllowed: event.dataTransfer.effectAllowed,
+        dropEffect: event.dataTransfer.dropEffect,
+        types: Array.from(event.dataTransfer.types)
+      }
+    });
 
-    const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect();
-    if (!reactFlowBounds) return;
+    event.preventDefault();
+    event.stopPropagation();
 
     try {
-      const nodeDataStr = event.dataTransfer.getData('application/reactflow');
-      if (!nodeDataStr) return;
+      // Try to get data in multiple formats
+      let nodeDataStr = event.dataTransfer.getData('application/reactflow');
+      console.log('📥 [DROP-DATA] ReactFlow data:', nodeDataStr);
+      
+      if (!nodeDataStr) {
+        nodeDataStr = event.dataTransfer.getData('text/plain');
+        console.log('📥 [DROP-DATA] Fallback to text/plain:', nodeDataStr);
+      }
+      
+      if (!nodeDataStr) {
+        console.log('❌ [DROP-ERROR] No data found in any format');
+        console.log('Available types:', Array.from(event.dataTransfer.types));
+        return;
+      }
 
       const nodeData = JSON.parse(nodeDataStr);
+      console.log('📦 [DROP-PARSED] Parsed node data:', nodeData);
       
       // Convert screen coordinates to flow coordinates
       const position = screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
       });
+      
+      console.log('📍 [DROP-POSITION] Calculated position:', position);
 
       // Add the node based on its type
       if (nodeData.type === 'basic' && nodeData.nodeType) {
+        console.log('🟦 [DROP-BASIC] Adding basic node:', nodeData.nodeType);
         onAddNode(nodeData.nodeType, position);
       } else if (nodeData.type === 'dynamic' && nodeData.configId) {
+        console.log('🟪 [DROP-DYNAMIC] Adding dynamic node:', nodeData.configId);
         onAddDynamicNode(nodeData.configId, position);
+      } else {
+        console.log('❓ [DROP-UNKNOWN] Unknown node type:', nodeData);
       }
+      
+      console.log('✅ [DROP-SUCCESS] Node should be added to canvas');
     } catch (error) {
-      console.error('Error handling drop:', error);
+      console.error('❌ [DROP-ERROR] Error handling drop:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
     }
   }, [screenToFlowPosition]);
 

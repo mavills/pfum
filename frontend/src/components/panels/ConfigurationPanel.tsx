@@ -58,6 +58,8 @@ const DraggableNode: React.FC<DraggableNodeProps> = ({
   onAddDynamicNode
 }) => {
   const handleDragStart = (event: React.DragEvent) => {
+    console.log('🚀 [DRAG-START] Starting drag for:', title);
+    
     const nodeData = {
       type,
       nodeType,
@@ -65,26 +67,52 @@ const DraggableNode: React.FC<DraggableNodeProps> = ({
       title
     };
     
-    event.dataTransfer.setData('application/reactflow', JSON.stringify(nodeData));
+    console.log('📦 [DRAG-DATA] Node data:', nodeData);
+    
+    // Set the data in multiple formats to ensure compatibility
+    const dataString = JSON.stringify(nodeData);
+    event.dataTransfer.setData('application/reactflow', dataString);
+    event.dataTransfer.setData('text/plain', dataString);
+    
+    // Set the effect to copy
     event.dataTransfer.effectAllowed = 'copy';
     
-    // Create drag image
+    console.log('✅ [DRAG-CONFIG] DataTransfer configured:', {
+      effectAllowed: event.dataTransfer.effectAllowed,
+      types: Array.from(event.dataTransfer.types)
+    });
+    
+    // Create a cleaner drag image
     const dragImage = document.createElement('div');
     dragImage.innerHTML = title;
     dragImage.style.position = 'absolute';
     dragImage.style.top = '-1000px';
+    dragImage.style.left = '-1000px';
     dragImage.style.background = '#4a5568';
     dragImage.style.color = 'white';
     dragImage.style.padding = '6px 10px';
     dragImage.style.borderRadius = '4px';
     dragImage.style.fontSize = '12px';
     dragImage.style.fontWeight = '500';
-    document.body.appendChild(dragImage);
-    event.dataTransfer.setDragImage(dragImage, 0, 0);
+    dragImage.style.pointerEvents = 'none';
+    dragImage.style.zIndex = '-1';
     
+    document.body.appendChild(dragImage);
+    
+    try {
+      event.dataTransfer.setDragImage(dragImage, 50, 15);
+      console.log('🖼️ [DRAG-IMAGE] Custom drag image set');
+    } catch (error) {
+      console.warn('⚠️ [DRAG-IMAGE] Failed to set custom drag image:', error);
+    }
+    
+    // Clean up the drag image after a short delay
     setTimeout(() => {
-      document.body.removeChild(dragImage);
-    }, 0);
+      if (document.body.contains(dragImage)) {
+        document.body.removeChild(dragImage);
+        console.log('🧹 [CLEANUP] Drag image removed');
+      }
+    }, 100);
   };
 
   const handleClick = () => {
@@ -99,7 +127,7 @@ const DraggableNode: React.FC<DraggableNodeProps> = ({
 
   return (
     <div
-      draggable
+      draggable={true}
       onDragStart={handleDragStart}
       onClick={handleClick}
       className="config-node-item"
