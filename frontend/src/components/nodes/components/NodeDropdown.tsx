@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Position } from '@xyflow/react';
-import StyledHandle, { handleColors } from '../HandleStyles';
+import StyledHandle from '../HandleStyles';
 
 interface DropdownOption {
   value: string;
@@ -18,8 +18,8 @@ interface NodeDropdownProps {
   hasOutput?: boolean;
   inputHandleId?: string;
   outputHandleId?: string;
-  nodeType?: 'input' | 'output' | 'stringConcat'; // to determine handle color
-  isConnected?: boolean; // to determine if the input is connected
+  nodeType?: 'input' | 'output' | 'stringConcat';
+  isConnected?: boolean;
   inputPosition?: Position;
   outputPosition?: Position;
   className?: string;
@@ -34,15 +34,26 @@ const NodeDropdown: React.FC<NodeDropdownProps> = ({
   hasOutput = false,
   inputHandleId = 'input',
   outputHandleId = 'output',
-  nodeType = 'output',
+  nodeType = 'stringConcat',
   isConnected = false,
   inputPosition = Position.Left,
   outputPosition = Position.Right,
   className = '',
 }) => {
-  // Map nodeType to handle color
-  const handleColor = handleColors[nodeType] || handleColors.output;
-  
+  // Map nodeType to design system theme
+  const getNodeTheme = (nodeType: string) => {
+    switch (nodeType) {
+      case 'input':
+        return 'input';
+      case 'output':
+        return 'output';
+      case 'stringConcat':
+        return 'transformation';
+      default:
+        return 'utility';
+    }
+  };
+
   return (
     <div className={`node-content-row relative ${className}`}>
       {/* Optional input handle */}
@@ -51,19 +62,17 @@ const NodeDropdown: React.FC<NodeDropdownProps> = ({
           type="target"
           position={inputPosition}
           id={inputHandleId}
-          color={handleColor}
+          nodeType={getNodeTheme(nodeType)}
           isConnected={isConnected}
         />
       )}
       
-      <span className="text-sm">{label}</span>
-      
-      {/* Hide the dropdown if connected */}
-      {(!isConnected || !hasInput) && (
+      <div className="flex flex-col w-full">
+        <span className="text-sm mb-1">{label}</span>
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="flex-grow ml-2 p-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1"
+          className="form-input p-1 text-sm"
         >
           {options.map((option) => (
             <option key={option.value} value={option.value}>
@@ -71,7 +80,7 @@ const NodeDropdown: React.FC<NodeDropdownProps> = ({
             </option>
           ))}
         </select>
-      )}
+      </div>
       
       {/* Optional output handle */}
       {hasOutput && (
@@ -79,7 +88,7 @@ const NodeDropdown: React.FC<NodeDropdownProps> = ({
           type="source"
           position={outputPosition}
           id={outputHandleId}
-          color={handleColor}
+          nodeType={getNodeTheme(nodeType)}
         />
       )}
     </div>

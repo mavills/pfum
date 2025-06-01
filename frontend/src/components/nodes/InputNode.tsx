@@ -4,11 +4,10 @@ import React, { useState, useCallback } from 'react';
 import { NodeProps } from '@xyflow/react';
 import { InputNodeData } from '../../types';
 import NodeWrapper from './NodeWrapper';
-import { handleColors } from './HandleStyles';
 import { NodeButton, InputNodeRow } from './components';
 
 const InputNode: React.FC<NodeProps> = ({ data, id }) => {
-  const nodeData = data as InputNodeData;
+  const nodeData = data as unknown as InputNodeData;
   const [newColumnName, setNewColumnName] = useState('');
   const [columnNames, setColumnNames] = useState<string[]>(nodeData?.column_names || []);
 
@@ -46,7 +45,7 @@ const InputNode: React.FC<NodeProps> = ({ data, id }) => {
   return (
     <NodeWrapper
       title="Input Node"
-      headerColor={handleColors.input}
+      theme="input"
     >
       <div className="text-sm mb-3 text-gray-600">CSV Column Definition</div>
       

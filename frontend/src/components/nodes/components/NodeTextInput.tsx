@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Position } from '@xyflow/react';
-import StyledHandle, { handleColors } from '../HandleStyles';
+import StyledHandle from '../HandleStyles';
 
 interface NodeTextInputProps {
   label: string;
@@ -13,7 +13,7 @@ interface NodeTextInputProps {
   hasOutput?: boolean;
   inputHandleId?: string;
   outputHandleId?: string;
-  nodeType?: 'input' | 'output' | 'stringConcat'; // to determine handle color
+  nodeType?: 'input' | 'output' | 'stringConcat' | 'transformation' | 'utility'; // to determine handle color
   isConnected?: boolean; // to determine if the input is connected
   inputPosition?: Position;
   outputPosition?: Position;
@@ -35,8 +35,19 @@ const NodeTextInput: React.FC<NodeTextInputProps> = ({
   outputPosition = Position.Right,
   className = '',
 }) => {
-  // Map nodeType to handle color
-  const handleColor = handleColors[nodeType] || handleColors.stringConcat;
+  // Map nodeType to design system theme
+  const getNodeTheme = (nodeType: string) => {
+    switch (nodeType) {
+      case 'input':
+        return 'input';
+      case 'output':
+        return 'output';
+      case 'stringConcat':
+        return 'transformation';
+      default:
+        return 'utility';
+    }
+  };
   
   return (
     <div className={`node-content-row relative ${className}`}>
@@ -46,7 +57,7 @@ const NodeTextInput: React.FC<NodeTextInputProps> = ({
           type="target"
           position={inputPosition}
           id={inputHandleId}
-          color={handleColor}
+          nodeType={getNodeTheme(nodeType)}
           isConnected={isConnected}
         />
       )}
@@ -60,7 +71,7 @@ const NodeTextInput: React.FC<NodeTextInputProps> = ({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="flex-grow ml-2 p-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1"
+          className="form-input flex-grow ml-2 p-1 text-sm"
         />
       )}
       
@@ -70,7 +81,7 @@ const NodeTextInput: React.FC<NodeTextInputProps> = ({
           type="source"
           position={outputPosition}
           id={outputHandleId}
-          color={handleColor}
+          nodeType={getNodeTheme(nodeType)}
         />
       )}
     </div>

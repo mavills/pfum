@@ -142,7 +142,7 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({ nodes, edges, isOpen, onClo
             value={sourceFile}
             onChange={(e) => setSourceFile(e.target.value)}
             placeholder="e.g., data/input.csv"
-            className="w-full p-2 border border-gray-300 rounded"
+            className="form-input w-full"
           />
         </div>
 
@@ -156,7 +156,7 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({ nodes, edges, isOpen, onClo
             onChange={(e) => setPreviewLimit(Math.min(1000, Math.max(1, parseInt(e.target.value) || 100)))}
             min="1"
             max="1000"
-            className="w-32 p-2 border border-gray-300 rounded"
+            className="form-input w-32"
           />
         </div>
 
@@ -164,7 +164,7 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({ nodes, edges, isOpen, onClo
           <button
             onClick={handlePreview}
             disabled={isLoading}
-            className={`primary-button ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`btn btn-primary ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {isLoading ? 'Loading...' : 'Preview Transformation'}
           </button>

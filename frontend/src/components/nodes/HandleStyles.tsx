@@ -7,7 +7,7 @@ type StyledHandleProps = {
   type: 'source' | 'target';
   position: Position;
   id: string;
-  color: string;
+  nodeType: 'input' | 'output' | 'transformation' | 'utility';
   isConnected?: boolean;
   isConnectable?: boolean;
   style?: React.CSSProperties;
@@ -17,24 +17,36 @@ const StyledHandle: React.FC<StyledHandleProps> = ({
   type,
   position,
   id,
-  color,
+  nodeType,
   isConnected = false,
   isConnectable = true,
   style = {},
 }) => {
-  const baseStyle: React.CSSProperties = {
-    width: '14px',
-    height: '14px',
-    background: color,
-    border: '2px solid rgba(255,255,255,0.9)',
-    zIndex: 10,
-    cursor: 'pointer',
-    ...style,
+  const getHandleColor = (nodeType: string) => {
+    switch (nodeType) {
+      case 'input':
+        return 'var(--color-primary)';
+      case 'transformation':
+        return '#8b5cf6';
+      case 'output':
+        return 'var(--color-success)';
+      case 'utility':
+      default:
+        return 'var(--color-secondary)';
+    }
   };
 
-  if (isConnected) {
-    baseStyle.borderColor = 'white';
-  }
+  const baseStyle: React.CSSProperties = {
+    width: '12px',
+    height: '12px',
+    background: isConnected ? getHandleColor(nodeType) : 'white',
+    border: `2px solid ${getHandleColor(nodeType)}`,
+    borderRadius: '50%',
+    zIndex: 'var(--z-handle)',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    ...style,
+  };
 
   return (
     <Handle
@@ -43,16 +55,16 @@ const StyledHandle: React.FC<StyledHandleProps> = ({
       id={id}
       isConnectable={isConnectable}
       style={baseStyle}
-      className={`${isConnected ? 'connected-handle' : ''}`}
+      className={`react-flow__handle ${isConnected ? 'connected' : ''}`}
     />
   );
 };
 
-// Predefined colors for different node types
+// Legacy color mapping for backward compatibility
 export const handleColors = {
-  input: '#E74C3C', // Red
-  output: '#27AE60', // Green
-  stringConcat: '#9B59B6', // Purple
+  input: 'var(--color-primary)',
+  output: 'var(--color-success)',
+  stringConcat: '#8b5cf6',
 };
 
 export default StyledHandle; 

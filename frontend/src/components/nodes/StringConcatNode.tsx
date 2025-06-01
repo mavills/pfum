@@ -4,15 +4,13 @@ import React, { useState, useCallback } from 'react';
 import { NodeProps as XYNodeProps, useEdges, Edge } from '@xyflow/react';
 import { StringConcatNodeData } from '../../types';
 import NodeWrapper from './NodeWrapper';
-import { handleColors } from './HandleStyles';
 import { NodeTextInput, NodeOutputRow } from './components';
 
 const StringConcatNode: React.FC<XYNodeProps> = ({ data, id }) => {
-  const nodeData = data as StringConcatNodeData;
+  const nodeData = data as unknown as StringConcatNodeData;
   const [separator, setSeparator] = useState<string>(nodeData?.separator || '_');
-  const [inputValues, setInputValues] = useState<Record<string, string>>(
-    nodeData?.inputValues || {}
-  );
+  const [input1, setInput1] = useState<string>(nodeData?.input_1 || '');
+  const [input2, setInput2] = useState<string>(nodeData?.input_2 || '');
   const edges = useEdges();
   
   // Update node data when separator changes
@@ -23,15 +21,20 @@ const StringConcatNode: React.FC<XYNodeProps> = ({ data, id }) => {
     }
   }, [nodeData]);
 
-  // Update input value
-  const handleInputChange = useCallback((inputId: string, value: string) => {
-    setInputValues(prev => {
-      const newValues = { ...prev, [inputId]: value };
-      if (nodeData) {
-        nodeData.inputValues = newValues;
-      }
-      return newValues;
-    });
+  // Update input 1 value
+  const handleInput1Change = useCallback((value: string) => {
+    setInput1(value);
+    if (nodeData) {
+      nodeData.input_1 = value;
+    }
+  }, [nodeData]);
+
+  // Update input 2 value
+  const handleInput2Change = useCallback((value: string) => {
+    setInput2(value);
+    if (nodeData) {
+      nodeData.input_2 = value;
+    }
   }, [nodeData]);
   
   // Check if inputs are connected
@@ -50,7 +53,7 @@ const StringConcatNode: React.FC<XYNodeProps> = ({ data, id }) => {
   return (
     <NodeWrapper
       title="String Concat"
-      headerColor={handleColors.stringConcat}
+      theme="transformation"
     >
       <div className="text-sm mb-3 text-gray-600">Concatenate Strings</div>
 
@@ -69,8 +72,8 @@ const StringConcatNode: React.FC<XYNodeProps> = ({ data, id }) => {
       {/* Input 1 */}
       <NodeTextInput
         label="Input 1"
-        value={inputValues['input-1'] || ''}
-        onChange={(value) => handleInputChange('input-1', value)}
+        value={input1}
+        onChange={handleInput1Change}
         hasInput={true}
         inputHandleId="input-1"
         nodeType="stringConcat"
@@ -81,8 +84,8 @@ const StringConcatNode: React.FC<XYNodeProps> = ({ data, id }) => {
       {/* Input 2 */}
       <NodeTextInput
         label="Input 2"
-        value={inputValues['input-2'] || ''}
-        onChange={(value) => handleInputChange('input-2', value)}
+        value={input2}
+        onChange={handleInput2Change}
         hasInput={true}
         inputHandleId="input-2"
         nodeType="stringConcat"

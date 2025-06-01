@@ -6,6 +6,7 @@ export enum NodeType {
   INPUT = 'input',
   OUTPUT = 'output',
   STRING_CONCAT = 'string_concat',
+  DYNAMIC = 'dynamic',
 }
 
 export interface BaseNodeData {
@@ -40,4 +41,7 @@ export type RFState = {
   nodes: CustomNode[];
   edges: CustomEdge[];
   node_types: Record<string, any>;
-}; 
+};
+
+// Re-export the dynamic node types
+export type { DynamicNodeData, NodeConfiguration, NodeInput, NodeOutput } from './nodeConfig'; 

@@ -102,10 +102,10 @@ const S3ExplorerPanel: React.FC<S3ExplorerPanelProps> = ({ onAddInputNode }) => 
         <div className="relative">
           <input
             type="text"
+            placeholder="Search files..."
             value={prefix}
             onChange={(e) => setPrefix(e.target.value)}
-            placeholder="Enter S3 prefix..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            className="form-input w-full text-sm"
           />
           <button 
             className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"

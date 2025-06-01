@@ -1,29 +1,31 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { ReactFlowProvider, ReactFlowInstance } from '@xyflow/react';
-import { Background, Controls, Panel, ConnectionLineType, BackgroundVariant } from '@xyflow/react';
+import { ReactFlowProvider } from '@xyflow/react';
+import { Background, Controls, Panel } from '@xyflow/react';
 import { Connection, Node, Edge, NodeTypes } from '@xyflow/react';
 import { NodeChange, EdgeChange, applyNodeChanges, applyEdgeChanges } from '@xyflow/react';
-import { useReactFlow } from '@xyflow/react';
 import { ReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/base.css';
 
 import InputNode from './nodes/InputNode';
 import OutputNode from './nodes/OutputNode';
 import StringConcatNode from './nodes/StringConcatNode';
+import DynamicNode from './nodes/DynamicNode';
 import ContextMenu from './panels/ContextMenu';
 import PreviewPanel from './panels/PreviewPanel';
 import ExportConfigPanel from './panels/ExportConfigPanel';
 import S3ExplorerPanel from './panels/S3ExplorerPanel';
-import { createNode, isValidConnection } from '../utils/nodeUtils';
+import { createNode, isValidConnection, createDynamicNode } from '../utils/nodeUtils';
 import { NodeType, InputNodeData } from '../types';
+import { initializeDefaultConfigurations } from '../services/nodeConfigService';
 
 // Define node types mapping
 const nodeTypes: NodeTypes = {
   [NodeType.INPUT]: InputNode,
   [NodeType.OUTPUT]: OutputNode,
   [NodeType.STRING_CONCAT]: StringConcatNode,
+  [NodeType.DYNAMIC]: DynamicNode,
 };
 
 const FlowWithProvider: React.FC = () => {
@@ -63,8 +65,12 @@ const FlowContent: React.FC = () => {
   // S3 Explorer panel state
   const [isS3ExplorerOpen, setIsS3ExplorerOpen] = useState(true);
 
-  const reactFlowInstance = useReactFlow();
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+
+  // Initialize node configurations on mount
+  useEffect(() => {
+    initializeDefaultConfigurations();
+  }, []);
 
   // Hide notification after 5 seconds
   useEffect(() => {
@@ -152,11 +158,26 @@ const FlowContent: React.FC = () => {
       x: position.x,
       y: position.y
     };
-    // Note: Since the project method is causing TypeScript errors, we're using the position directly
-    // In a real app, you might want to convert this properly
     
     const newNode = createNode(type, flowPosition);
     setNodes((nds) => [...nds, newNode]);
+  }, []);
+
+  // Add a dynamic node from the context menu
+  const onAddDynamicNode = useCallback((configId: string, position: { x: number; y: number }) => {
+    // Convert from screen to flow coordinates
+    const flowPosition = {
+      x: position.x,
+      y: position.y
+    };
+    
+    try {
+      const newNode = createDynamicNode(configId, flowPosition);
+      setNodes((nds) => [...nds, newNode]);
+    } catch (error) {
+      console.error('Failed to create dynamic node:', error);
+      // You could add a toast notification here
+    }
   }, []);
 
   // Add input node from S3 file
@@ -176,7 +197,7 @@ const FlowContent: React.FC = () => {
     const newNode = createNode(NodeType.INPUT, position);
     
     // Update the node data with column names and source file
-    const nodeData = newNode.data as InputNodeData;
+    const nodeData = newNode.data as unknown as InputNodeData;
     nodeData.column_names = columnNames;
     nodeData.source_file = sourceFile;
     
@@ -207,25 +228,21 @@ const FlowContent: React.FC = () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [selectedEdge]);
-
-  // Calculate the ReactFlow wrapper class based on whether S3 Explorer is open
-  const reactFlowWrapperClass = isS3ExplorerOpen 
-    ? "flex-1 ml-72" // With S3 Explorer open (width: 18rem = 72)
-    : "flex-1";      // Without S3 Explorer
     
   return (
-    <div className="flex flex-row h-screen">
-      {/* S3 Explorer Panel */}
+    <>
+      {/* S3 Explorer Sidebar */}
       {isS3ExplorerOpen && (
-        <div className="w-72 h-full border-r border-gray-200 fixed left-0 top-0 z-10">
+        <div className="app-sidebar">
           <S3ExplorerPanel onAddInputNode={onAddInputNodeFromS3} />
         </div>
       )}
       
-      <div className={reactFlowWrapperClass} ref={reactFlowWrapper}>
+      {/* Main Content Area */}
+      <div className="app-main">
         {/* Feature notification */}
         {showNotification && (
-          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white py-2 px-4 rounded-lg shadow-lg z-50 flex items-center space-x-2 animate-fade-in">
+          <div className="notification">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
@@ -241,93 +258,99 @@ const FlowContent: React.FC = () => {
           </div>
         )}
         
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onEdgeClick={onEdgeClick}
-          onPaneClick={onPaneClick}
-          onPaneContextMenu={onPaneContextMenu}
-          nodeTypes={nodeTypes}
-          fitView
-          edgesFocusable={true}
-          selectNodesOnDrag={false}
-        >
-          <Background 
-            color="#aaa" 
-            gap={16} 
-            size={1} 
-          />
-          <Controls />
-          
-          {contextMenu.show && (
-            <ContextMenu
-              x={contextMenu.x}
-              y={contextMenu.y}
-              onClose={() => setContextMenu({ ...contextMenu, show: false })}
-              onAddNode={onAddNode}
+        {/* ReactFlow Viewport */}
+        <div className="app-viewport" ref={reactFlowWrapper}>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onEdgeClick={onEdgeClick}
+            onPaneClick={onPaneClick}
+            onPaneContextMenu={onPaneContextMenu}
+            nodeTypes={nodeTypes}
+            fitView
+            edgesFocusable={true}
+            selectNodesOnDrag={false}
+          >
+            <Background 
+              color="#aaa" 
+              gap={16} 
+              size={1} 
             />
-          )}
-          
-          <Panel position="top-left" className="bg-white p-3 rounded-md shadow-md">
-            <h3 className="text-lg font-bold mb-2">CSV Transformation Editor</h3>
-            <p className="text-sm text-gray-600">Right-click to add nodes</p>
-          </Panel>
-
-          <Panel position="top-right" className="bg-white p-3 rounded-md shadow-md flex gap-3">
-            <button 
-              className="primary-button"
-              onClick={() => setIsPreviewOpen(true)}
-            >
-              Preview Transformation
-            </button>
-            <button 
-              className="secondary-button"
-              onClick={() => setIsExportOpen(true)}
-            >
-              Export Config
-            </button>
-            <button 
-              className="secondary-button"
-              onClick={() => setIsS3ExplorerOpen(!isS3ExplorerOpen)}
-            >
-              {isS3ExplorerOpen ? 'Hide S3 Explorer' : 'Show S3 Explorer'}
-            </button>
-            {selectedEdge && (
-              <button 
-                className="destructive-button"
-                onClick={() => {
-                  setEdges((eds) => eds.filter((edge) => edge.id !== selectedEdge));
-                  setSelectedEdge(null);
-                }}
-              >
-                Delete Connection
-              </button>
+            <Controls />
+            
+            {contextMenu.show && (
+              <ContextMenu
+                x={contextMenu.x}
+                y={contextMenu.y}
+                onClose={() => setContextMenu({ ...contextMenu, show: false })}
+                onAddNode={onAddNode}
+                onAddDynamicNode={onAddDynamicNode}
+              />
             )}
-          </Panel>
-        </ReactFlow>
+            
+            <Panel position="top-left" className="bg-white p-3 rounded-md shadow-md">
+              <h3 className="text-lg font-bold mb-2">CSV Transformation Editor</h3>
+              <p className="text-sm text-gray-600">Right-click to add nodes</p>
+            </Panel>
+
+            <Panel position="top-right" className="bg-white p-3 rounded-md shadow-md flex gap-3">
+              <button 
+                className="btn btn-primary"
+                onClick={() => setIsPreviewOpen(true)}
+              >
+                Preview Transformation
+              </button>
+              <button 
+                className="btn btn-secondary"
+                onClick={() => setIsExportOpen(true)}
+              >
+                Export Config
+              </button>
+              <button 
+                className="btn btn-secondary"
+                onClick={() => setIsS3ExplorerOpen(!isS3ExplorerOpen)}
+              >
+                {isS3ExplorerOpen ? 'Hide S3 Explorer' : 'Show S3 Explorer'}
+              </button>
+              {selectedEdge && (
+                <button 
+                  className="btn btn-destructive"
+                  onClick={() => {
+                    setEdges((eds) => eds.filter((edge) => edge.id !== selectedEdge));
+                    setSelectedEdge(null);
+                  }}
+                >
+                  Delete Connection
+                </button>
+              )}
+            </Panel>
+          </ReactFlow>
+        </div>
         
-        {/* Preview Panel */}
+        {/* Preview Panel Modal */}
         {isPreviewOpen && (
           <PreviewPanel 
+            isOpen={isPreviewOpen}
             onClose={() => setIsPreviewOpen(false)}
             nodes={nodes}
             edges={edges}
           />
         )}
         
-        {/* Export Config Panel */}
+        {/* Export Config Panel Modal */}
         {isExportOpen && (
           <ExportConfigPanel 
+            isOpen={isExportOpen}
             onClose={() => setIsExportOpen(false)}
             nodes={nodes}
             edges={edges}
           />
         )}
       </div>
-    </div>
+    </>
   );
 };
 

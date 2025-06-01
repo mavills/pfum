@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Position } from '@xyflow/react';
-import StyledHandle, { handleColors } from '../HandleStyles';
+import StyledHandle from '../HandleStyles';
 
 interface InputNodeRowProps {
   id: string;
@@ -40,7 +40,7 @@ const InputNodeRow: React.FC<InputNodeRowProps> = ({
           type="text"
           value={label}
           onChange={(e) => onChange(e.target.value)}
-          className="flex-grow p-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-400"
+          className="form-input flex-grow p-1 text-sm"
         />
       </div>
       
@@ -49,7 +49,7 @@ const InputNodeRow: React.FC<InputNodeRowProps> = ({
         type="source"
         position={Position.Right}
         id={outputHandleId}
-        color={handleColors.input}
+        nodeType="input"
       />
     </div>
   );

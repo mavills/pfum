@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { NodeProps as XYNodeProps, useEdges, Edge } from '@xyflow/react';
 import { OutputNodeData, EntityType } from '../../types';
 import NodeWrapper from './NodeWrapper';
-import { handleColors } from './HandleStyles';
 import { NodeDropdown, NodeTextInput } from './components';
 
 // Define entity field configurations
@@ -34,12 +33,12 @@ const entityTypeOptions = Object.values(EntityType).map(type => ({
 }));
 
 const OutputNode: React.FC<XYNodeProps> = ({ data, id }) => {
-  const nodeData = data as OutputNodeData;
+  const nodeData = data as unknown as OutputNodeData;
   const [entityType, setEntityType] = useState<EntityType>(
-    nodeData?.entityType || EntityType.COURSES
+    nodeData?.entity_type || EntityType.COURSES
   );
   const [fieldValues, setFieldValues] = useState<Record<string, string>>(
-    nodeData?.fieldValues || {}
+    nodeData?.field_values || {}
   );
   const edges = useEdges();
 
@@ -48,7 +47,7 @@ const OutputNode: React.FC<XYNodeProps> = ({ data, id }) => {
     const newEntityType = value as EntityType;
     setEntityType(newEntityType);
     if (nodeData) {
-      nodeData.entityType = newEntityType;
+      nodeData.entity_type = newEntityType;
     }
   }, [nodeData]);
 
@@ -57,7 +56,7 @@ const OutputNode: React.FC<XYNodeProps> = ({ data, id }) => {
     setFieldValues(prev => {
       const newValues = { ...prev, [fieldId]: value };
       if (nodeData) {
-        nodeData.fieldValues = newValues;
+        nodeData.field_values = newValues;
       }
       return newValues;
     });
@@ -73,7 +72,7 @@ const OutputNode: React.FC<XYNodeProps> = ({ data, id }) => {
   const entityConfig = ENTITY_CONFIGS[entityType];
 
   return (
-    <NodeWrapper title="Output Node" headerColor={handleColors.output}>
+    <NodeWrapper title="Output Node" theme="output">
       <div className="text-sm mb-3 text-gray-600">Entity Definition</div>
 
       <NodeDropdown
