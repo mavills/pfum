@@ -1,7 +1,8 @@
 import { Node } from '@xyflow/react';
 import { NodeType, InputNodeData, OutputNodeData, StringConcatNodeData, EntityType, DynamicNodeData } from '../types';
-import { NodeConfiguration } from '../types/nodeConfig';
+import { NodeConfiguration, isDynamicNode } from '../types/nodeConfig';
 import { nodeConfigService } from '../services/nodeConfigService';
+import { areTypesCompatible } from '../components/nodes/HandleStyles';
 
 let nodeId = 0;
 
@@ -54,7 +55,7 @@ export const createDynamicNode = (
   const id = `node_${nodeId++}`;
   
   // Initialize input values with defaults
-  const inputValues: Record<string, any> = {};
+  const inputValues: Record<string, string | number | boolean> = {};
   config.inputs.forEach(input => {
     if (input.default !== undefined) {
       inputValues[input.name] = input.default;
@@ -92,6 +93,47 @@ export const getNodeLabel = (type: NodeType): string => {
   }
 };
 
+// Helper to get data type from handle ID and node configuration
+function getHandleDataType(
+  node: Node,
+  handleId: string | null,
+  isOutput: boolean
+): string | undefined {
+  if (!handleId || !node) return undefined;
+
+  // Check if it's a dynamic node
+  if (isDynamicNode(node.data)) {
+    const config = node.data.config;
+    
+    if (isOutput) {
+      // Find output type by handle ID
+      const output = config.outputs.find(output => 
+        `output-${output.name.toLowerCase().replace(/\s+/g, '-')}` === handleId
+      );
+      return output?.type;
+    } else {
+      // Find input type by handle ID  
+      const input = config.inputs.find(input =>
+        `input-${input.name.toLowerCase().replace(/\s+/g, '-')}` === handleId
+      );
+      return input?.type;
+    }
+  }
+
+  // For legacy nodes, return default types based on node type
+  switch (node.type) {
+    case NodeType.INPUT:
+      return 'string'; // Input nodes output strings
+    case NodeType.OUTPUT:
+      return 'string'; // Output nodes accept strings
+    case NodeType.STRING_CONCAT:
+      if (isOutput) return 'string';
+      return 'string'; // String concat accepts strings
+    default:
+      return undefined; // Unknown type
+  }
+}
+
 // Helper to validate if a connection can be created between two nodes
 export const isValidConnection = (
   sourceHandle: string | null,
@@ -101,11 +143,12 @@ export const isValidConnection = (
 ): boolean => {
   if (!sourceNode || !targetNode) return false;
 
-  // All inputs and outputs are strings in this app, so we're mainly 
-  // checking that we're connecting from an output to an input
-  // Future: Add actual type checking logic here based on input/output types
-  
-  return true;
+  // Get data types for the handles
+  const sourceType = getHandleDataType(sourceNode, sourceHandle, true);
+  const targetType = getHandleDataType(targetNode, targetHandle, false);
+
+  // Use the type compatibility check
+  return areTypesCompatible(sourceType, targetType);
 };
 
 // Helper to get all available node configurations

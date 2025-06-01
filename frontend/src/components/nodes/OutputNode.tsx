@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { NodeProps as XYNodeProps, useEdges, Edge } from '@xyflow/react';
 import { OutputNodeData, EntityType } from '../../types';
 import NodeWrapper from './NodeWrapper';
@@ -81,7 +81,6 @@ const OutputNode: React.FC<XYNodeProps> = ({ data, id }) => {
         options={entityTypeOptions}
         onChange={handleEntityTypeChange}
         className="mb-4"
-        nodeType="output"
       />
 
       <div className="mb-2">
@@ -95,7 +94,7 @@ const OutputNode: React.FC<XYNodeProps> = ({ data, id }) => {
               onChange={(value) => handleFieldChange(field.id, value)}
               hasInput={true}
               inputHandleId={field.id}
-              nodeType="output"
+              inputDataType="string"
               isConnected={getIsFieldConnected(field.id)}
             />
           ))}

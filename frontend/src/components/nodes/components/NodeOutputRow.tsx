@@ -7,7 +7,7 @@ import StyledHandle from '../HandleStyles';
 interface NodeOutputRowProps {
   label: string;
   outputHandleId: string;
-  nodeType?: 'input' | 'output' | 'stringConcat' | 'transformation' | 'utility';
+  outputDataType?: string; // Data type for output handle
   outputPosition?: Position;
   className?: string;
 }
@@ -15,24 +15,10 @@ interface NodeOutputRowProps {
 const NodeOutputRow: React.FC<NodeOutputRowProps> = ({
   label,
   outputHandleId,
-  nodeType = 'stringConcat',
+  outputDataType,
   outputPosition = Position.Right,
   className = '',
 }) => {
-  // Map nodeType to design system theme
-  const getNodeTheme = (nodeType: string) => {
-    switch (nodeType) {
-      case 'input':
-        return 'input';
-      case 'output':
-        return 'output';
-      case 'stringConcat':
-        return 'transformation';
-      default:
-        return 'utility';
-    }
-  };
-  
   return (
     <div className={`node-content-row relative ${className}`}>
       <div className="flex justify-end w-full">
@@ -44,7 +30,7 @@ const NodeOutputRow: React.FC<NodeOutputRowProps> = ({
         type="source"
         position={outputPosition}
         id={outputHandleId}
-        nodeType={getNodeTheme(nodeType)}
+        dataType={outputDataType}
       />
     </div>
   );

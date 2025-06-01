@@ -87,7 +87,7 @@ const DynamicNode: React.FC<NodeProps> = ({ data, id }) => {
                 placeholder={input.description}
                 hasInput={true}
                 inputHandleId={getInputHandleId(input.name)}
-                nodeType="transformation"
+                inputDataType={input.type}
                 isConnected={isInputConnected(input.name)}
                 className="mb-2"
               />
@@ -106,7 +106,7 @@ const DynamicNode: React.FC<NodeProps> = ({ data, id }) => {
                 key={`${id}-output-${output.name}`}
                 label={output.name}
                 outputHandleId={getOutputHandleId(output.name)}
-                nodeType="transformation"
+                outputDataType={output.type}
               />
             ))}
           </div>

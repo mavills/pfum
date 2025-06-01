@@ -84,6 +84,7 @@ const InputNode: React.FC<NodeProps> = ({ data, id }) => {
               onChange={(value) => updateColumnName(index, value)}
               onDelete={() => removeColumnName(index)}
               outputHandleId={`column-${index}`}
+              outputDataType="string"
             />
           ))}
         </div>

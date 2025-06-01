@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Position } from '@xyflow/react';
 import StyledHandle from '../HandleStyles';
 
@@ -13,7 +13,8 @@ interface NodeTextInputProps {
   hasOutput?: boolean;
   inputHandleId?: string;
   outputHandleId?: string;
-  nodeType?: 'input' | 'output' | 'stringConcat' | 'transformation' | 'utility'; // to determine handle color
+  inputDataType?: string; // Data type for input handle
+  outputDataType?: string; // Data type for output handle
   isConnected?: boolean; // to determine if the input is connected
   inputPosition?: Position;
   outputPosition?: Position;
@@ -29,26 +30,13 @@ const NodeTextInput: React.FC<NodeTextInputProps> = ({
   hasOutput = false,
   inputHandleId = 'input',
   outputHandleId = 'output',
-  nodeType = 'stringConcat',
+  inputDataType,
+  outputDataType,
   isConnected = false,
   inputPosition = Position.Left,
   outputPosition = Position.Right,
   className = '',
 }) => {
-  // Map nodeType to design system theme
-  const getNodeTheme = (nodeType: string) => {
-    switch (nodeType) {
-      case 'input':
-        return 'input';
-      case 'output':
-        return 'output';
-      case 'stringConcat':
-        return 'transformation';
-      default:
-        return 'utility';
-    }
-  };
-  
   return (
     <div className={`node-content-row relative ${className}`}>
       {/* Optional input handle */}
@@ -57,7 +45,7 @@ const NodeTextInput: React.FC<NodeTextInputProps> = ({
           type="target"
           position={inputPosition}
           id={inputHandleId}
-          nodeType={getNodeTheme(nodeType)}
+          dataType={inputDataType}
           isConnected={isConnected}
         />
       )}
@@ -81,7 +69,7 @@ const NodeTextInput: React.FC<NodeTextInputProps> = ({
           type="source"
           position={outputPosition}
           id={outputHandleId}
-          nodeType={getNodeTheme(nodeType)}
+          dataType={outputDataType}
         />
       )}
     </div>

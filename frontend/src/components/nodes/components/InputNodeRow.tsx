@@ -11,6 +11,7 @@ interface InputNodeRowProps {
   onChange: (value: string) => void;
   onDelete: () => void;
   outputHandleId: string;
+  outputDataType?: string;
   className?: string;
 }
 
@@ -21,6 +22,7 @@ const InputNodeRow: React.FC<InputNodeRowProps> = ({
   onChange,
   onDelete,
   outputHandleId,
+  outputDataType = "string",
   className = '',
 }) => {
   return (
@@ -49,7 +51,7 @@ const InputNodeRow: React.FC<InputNodeRowProps> = ({
         type="source"
         position={Position.Right}
         id={outputHandleId}
-        nodeType="input"
+        dataType={outputDataType}
       />
     </div>
   );

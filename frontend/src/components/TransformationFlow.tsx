@@ -1,21 +1,32 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { ReactFlowProvider } from '@xyflow/react';
-import { Background, Controls, Panel } from '@xyflow/react';
-import { Connection, Node, Edge, NodeTypes } from '@xyflow/react';
-import { NodeChange, EdgeChange, applyNodeChanges, applyEdgeChanges } from '@xyflow/react';
-import { ReactFlow } from '@xyflow/react';
+import { 
+  ReactFlowProvider,
+  ReactFlow,
+  Background, 
+  Controls, 
+  Panel,
+  Connection, 
+  Node, 
+  Edge, 
+  NodeTypes,
+  NodeChange, 
+  EdgeChange, 
+  applyNodeChanges, 
+  applyEdgeChanges,
+  useReactFlow
+} from '@xyflow/react';
 import '@xyflow/react/dist/base.css';
 
 import InputNode from './nodes/InputNode';
 import OutputNode from './nodes/OutputNode';
 import StringConcatNode from './nodes/StringConcatNode';
 import DynamicNode from './nodes/DynamicNode';
-import ContextMenu from './panels/ContextMenu';
 import PreviewPanel from './panels/PreviewPanel';
 import ExportConfigPanel from './panels/ExportConfigPanel';
 import S3ExplorerPanel from './panels/S3ExplorerPanel';
+import NodePalette from './panels/NodePalette';
 import { createNode, isValidConnection, createDynamicNode } from '../utils/nodeUtils';
 import { NodeType, InputNodeData } from '../types';
 import { initializeDefaultConfigurations } from '../services/nodeConfigService';
@@ -47,17 +58,6 @@ const FlowContent: React.FC = () => {
   // Notification state
   const [showNotification, setShowNotification] = useState(true);
   
-  // Context menu state
-  const [contextMenu, setContextMenu] = useState<{
-    show: boolean;
-    x: number;
-    y: number;
-  }>({
-    show: false,
-    x: 0,
-    y: 0,
-  });
-
   // Panel states
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -65,8 +65,10 @@ const FlowContent: React.FC = () => {
   // S3 Explorer panel state
   const [isS3ExplorerOpen, setIsS3ExplorerOpen] = useState(true);
 
+  // ReactFlow hooks
+  const reactFlow = useReactFlow();
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-
+  
   // Initialize node configurations on mount
   useEffect(() => {
     initializeDefaultConfigurations();
@@ -138,47 +140,57 @@ const FlowContent: React.FC = () => {
     setSelectedEdge(null);
   }, []);
 
-  // Handle right click to open context menu
-  const onPaneContextMenu = useCallback((event: MouseEvent | React.MouseEvent<Element, MouseEvent>) => {
-    // Prevent default context menu
-    event.preventDefault();
-    
-    // Show context menu at that position
-    setContextMenu({
-      show: true,
-      x: event.clientX,
-      y: event.clientY,
-    });
-  }, []);
-
-  // Add a new node from the context menu
+  // Add a new node from drag and drop
   const onAddNode = useCallback((type: NodeType, position: { x: number; y: number }) => {
-    // Convert from screen to flow coordinates
-    const flowPosition = {
-      x: position.x,
-      y: position.y
-    };
-    
-    const newNode = createNode(type, flowPosition);
+    const newNode = createNode(type, position);
     setNodes((nds) => [...nds, newNode]);
   }, []);
 
-  // Add a dynamic node from the context menu
+  // Add a dynamic node from drag and drop
   const onAddDynamicNode = useCallback((configId: string, position: { x: number; y: number }) => {
-    // Convert from screen to flow coordinates
-    const flowPosition = {
-      x: position.x,
-      y: position.y
-    };
-    
     try {
-      const newNode = createDynamicNode(configId, flowPosition);
+      const newNode = createDynamicNode(configId, position);
       setNodes((nds) => [...nds, newNode]);
     } catch (error) {
       console.error('Failed to create dynamic node:', error);
       // You could add a toast notification here
     }
   }, []);
+
+  // Drag and drop handlers
+  const onDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }, []);
+
+  const onDrop = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+
+    const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect();
+    if (!reactFlowBounds) return;
+
+    try {
+      const nodeDataStr = event.dataTransfer.getData('application/reactflow');
+      if (!nodeDataStr) return;
+
+      const nodeData = JSON.parse(nodeDataStr);
+      
+      // Convert screen coordinates to flow coordinates
+      const position = reactFlow.screenToFlowPosition({
+        x: event.clientX - reactFlowBounds.left,
+        y: event.clientY - reactFlowBounds.top,
+      });
+
+      // Add the node based on its type
+      if (nodeData.type === 'basic' && nodeData.nodeType) {
+        onAddNode(nodeData.nodeType, position);
+      } else if (nodeData.type === 'dynamic' && nodeData.configId) {
+        onAddDynamicNode(nodeData.configId, position);
+      }
+    } catch (error) {
+      console.error('Error handling drop:', error);
+    }
+  }, [reactFlow, onAddNode, onAddDynamicNode]);
 
   // Add input node from S3 file
   const onAddInputNodeFromS3 = useCallback((columnNames: string[], sourceFile: string) => {
@@ -234,6 +246,10 @@ const FlowContent: React.FC = () => {
       {/* S3 Explorer Sidebar */}
       {isS3ExplorerOpen && (
         <div className="app-sidebar">
+          <NodePalette 
+            onAddNode={onAddNode}
+            onAddDynamicNode={onAddDynamicNode}
+          />
           <S3ExplorerPanel onAddInputNode={onAddInputNodeFromS3} />
         </div>
       )}
@@ -268,7 +284,8 @@ const FlowContent: React.FC = () => {
             onConnect={onConnect}
             onEdgeClick={onEdgeClick}
             onPaneClick={onPaneClick}
-            onPaneContextMenu={onPaneContextMenu}
+            onDragOver={onDragOver}
+            onDrop={onDrop}
             nodeTypes={nodeTypes}
             fitView
             edgesFocusable={true}
@@ -281,19 +298,9 @@ const FlowContent: React.FC = () => {
             />
             <Controls />
             
-            {contextMenu.show && (
-              <ContextMenu
-                x={contextMenu.x}
-                y={contextMenu.y}
-                onClose={() => setContextMenu({ ...contextMenu, show: false })}
-                onAddNode={onAddNode}
-                onAddDynamicNode={onAddDynamicNode}
-              />
-            )}
-            
             <Panel position="top-left" className="bg-white p-3 rounded-md shadow-md">
               <h3 className="text-lg font-bold mb-2">CSV Transformation Editor</h3>
-              <p className="text-sm text-gray-600">Right-click to add nodes</p>
+              <p className="text-sm text-gray-600">Drag nodes from the sidebar to add them</p>
             </Panel>
 
             <Panel position="top-right" className="bg-white p-3 rounded-md shadow-md flex gap-3">

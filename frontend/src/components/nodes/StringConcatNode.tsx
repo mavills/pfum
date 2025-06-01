@@ -64,7 +64,7 @@ const StringConcatNode: React.FC<XYNodeProps> = ({ data, id }) => {
         onChange={handleSeparatorChange}
         hasInput={true}
         inputHandleId="separator"
-        nodeType="stringConcat"
+        inputDataType="string"
         isConnected={isSeparatorConnected}
         className="mb-2"
       />
@@ -76,7 +76,7 @@ const StringConcatNode: React.FC<XYNodeProps> = ({ data, id }) => {
         onChange={handleInput1Change}
         hasInput={true}
         inputHandleId="input-1"
-        nodeType="stringConcat"
+        inputDataType="string"
         isConnected={isInput1Connected}
         className="mb-2"
       />
@@ -88,7 +88,7 @@ const StringConcatNode: React.FC<XYNodeProps> = ({ data, id }) => {
         onChange={handleInput2Change}
         hasInput={true}
         inputHandleId="input-2"
-        nodeType="stringConcat"
+        inputDataType="string"
         isConnected={isInput2Connected}
         className="mb-2"
       />
@@ -97,7 +97,7 @@ const StringConcatNode: React.FC<XYNodeProps> = ({ data, id }) => {
       <NodeOutputRow
         label="Output"
         outputHandleId="output"
-        nodeType="stringConcat"
+        outputDataType="string"
       />
     </NodeWrapper>
   );
