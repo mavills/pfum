@@ -96,6 +96,7 @@ const FlowContent: React.FC = () => {
   }, []);
 
   const onDrop = useCallback((event: React.DragEvent) => {
+    console.log('onDrop');
     event.preventDefault();
 
     const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect();
@@ -226,10 +227,10 @@ const FlowContent: React.FC = () => {
         <div 
           className="app-viewport" 
           ref={reactFlowWrapper}
-          onDragOver={onDragOver}
-          onDrop={onDrop}
         >
           <ReactFlow
+            onDragOver={onDragOver}
+            onDrop={onDrop}
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}
