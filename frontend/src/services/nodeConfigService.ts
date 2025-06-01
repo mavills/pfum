@@ -184,6 +184,59 @@ export function initializeDefaultConfigurations() {
   
   nodeConfigService.loadConfiguration(stringToDatetimeConfig);
   nodeConfigService.loadConfiguration(stringConcatConfig);
+  
+  // Example: Simple Math Addition node for testing
+  const mathAdditionConfig: NodeConfiguration = {
+    name: "Math Addition",
+    description: "Add two numbers together",
+    category: "Math Operations",
+    inputs: [
+      {
+        name: "First Number",
+        type: "number",
+        description: "The first number to add",
+        path: "operations.0.kwargs.result_col.on.kwargs.left",
+        required: true
+      },
+      {
+        name: "Second Number",
+        type: "number", 
+        description: "The second number to add",
+        path: "operations.0.kwargs.result_col.on.kwargs.right",
+        required: true
+      }
+    ],
+    outputs: [
+      {
+        name: "Sum",
+        type: "number",
+        description: "The sum of the two numbers",
+        path: "operations.0.kwargs.result_col.kwargs.name"
+      }
+    ],
+    operations: [
+      {
+        operation: "with_columns",
+        kwargs: {
+          result_col: {
+            expr: "alias",
+            on: {
+              expr: "add",
+              kwargs: {
+                left: { expr: "col", kwargs: { name: "first_number" } },
+                right: { expr: "col", kwargs: { name: "second_number" } }
+              }
+            },
+            kwargs: {
+              name: "sum_result"
+            }
+          }
+        }
+      }
+    ]
+  };
+  
+  nodeConfigService.loadConfiguration(mathAdditionConfig);
 }
 
 export default nodeConfigService; 

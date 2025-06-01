@@ -291,4 +291,65 @@ The system supports both dynamic and legacy nodes simultaneously.
 - Enhanced type compatibility rules
 - Custom UI components per input type
 - **Type inference from connected nodes**
-- **Visual type compatibility indicators** 
+- **Visual type compatibility indicators**
+
+## Future Vision: Remote Configuration Loading
+
+The current implementation stores configurations in memory and loads them at startup. The future vision includes:
+
+### Remote JSON Loading & Caching
+- **Remote API Integration**: Load node configurations from a remote server/API
+- **Local Caching**: Cache configurations locally for offline use and performance
+- **Hot Reloading**: Update configurations without restarting the application
+- **Version Management**: Handle configuration updates and backwards compatibility
+- **Configuration Discovery**: Automatically discover available configurations from remote sources
+
+### Implementation Strategy
+1. **Phase 1 (Current)**: Local JSON configurations loaded at startup
+2. **Phase 2**: File-based loading from local JSON files
+3. **Phase 3**: Remote API integration with caching
+4. **Phase 4**: Real-time configuration updates and hot reloading
+
+### Technical Approach
+```typescript
+// Future API for remote loading
+const configService = new RemoteNodeConfigService({
+  apiUrl: 'https://api.example.com/node-configs',
+  cacheStrategy: 'localStorage', // or 'indexedDB'
+  updateInterval: 300000, // 5 minutes
+  fallbackToCache: true
+});
+
+// Load configurations from remote with caching
+await configService.loadRemoteConfigurations();
+
+// Subscribe to configuration updates
+configService.onConfigurationUpdate((newConfigs) => {
+  // Update UI with new configurations
+});
+```
+
+### Current Status (Working Now)
+✅ **JSON Configuration System**: Fully functional with type-based handles  
+✅ **Dynamic Node Rendering**: Nodes render based on JSON configuration  
+✅ **Sidebar Integration**: Dynamic nodes appear in the "Add Nodes" sidebar  
+✅ **Type-based Connections**: Handle colors and connection validation working  
+✅ **Default Configurations**: 3 example configurations loaded at startup:
+   - String to Datetime (Data Transformation)
+   - String Concatenation (String Operations)  
+   - Math Addition (Math Operations)
+✅ **Drag & Drop**: Can drag dynamic nodes from sidebar to canvas  
+✅ **Click to Add**: Can click dynamic nodes to add them at center  
+
+### Testing the Current Implementation
+1. Start the development server (`npm run dev`)
+2. Open the application in your browser
+3. Look at the left sidebar - you should see "Add Nodes" section
+4. Expand the categories to see:
+   - **Basic Nodes**: Input Node, Output Node, String Concatenation
+   - **Data Transformation**: String to Datetime
+   - **String Operations**: String Concatenation (dynamic version)
+   - **Math Operations**: Math Addition
+5. Drag or click any dynamic node to add it to the canvas
+6. Notice the different handle colors for different data types
+7. Try connecting handles - some connections will be blocked based on type compatibility 

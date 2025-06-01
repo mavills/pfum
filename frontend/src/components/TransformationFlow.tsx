@@ -27,6 +27,7 @@ import ExportConfigPanel from './panels/ExportConfigPanel';
 // Types and utilities
 import { NodeType, InputNodeData } from '../types';
 import { createNode, createDynamicNode } from '../utils/nodeUtils';
+import { initializeDefaultConfigurations } from '../services/nodeConfigService';
 
 const nodeTypes = {
   input: InputNode,
@@ -46,6 +47,11 @@ const TransformationFlow: React.FC = () => {
 
 // FlowContent component (the main flow logic)
 const FlowContent: React.FC = () => {
+  // Initialize default configurations on first render
+  useEffect(() => {
+    initializeDefaultConfigurations();
+  }, []);
+
   // State for nodes and edges
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -55,7 +61,7 @@ const FlowContent: React.FC = () => {
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isS3ExplorerOpen, setIsS3ExplorerOpen] = useState(true);
   const [selectedEdge, setSelectedEdge] = useState<string | null>(null);
-  const [showNotification, setShowNotification] = useState(true);
+  const [showNotification, setShowNotification] = useState(false);
 
   // ReactFlow hooks
   const { screenToFlowPosition } = useReactFlow();
@@ -210,7 +216,7 @@ const FlowContent: React.FC = () => {
     setNodes((nds) => [...nds, newNode]);
     
     // Show a notification
-    setShowNotification(true);
+    // setShowNotification(true);
   }, [nodes, setNodes]);
 
   // Handle keyboard events for deleting edges
