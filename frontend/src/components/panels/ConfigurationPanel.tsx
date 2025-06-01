@@ -31,6 +31,7 @@ interface ConfigurationPanelProps {
   onAddInputNodeFromS3: (columnNames: string[], sourceFile: string) => void;
   onPreviewTransformation: () => void;
   onExportConfig: () => void;
+  onExportGraph: () => void;
   onToggleS3Explorer: () => void;
   isS3ExplorerOpen: boolean;
 }
@@ -154,6 +155,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
   onAddInputNodeFromS3,
   onPreviewTransformation,
   onExportConfig,
+  onExportGraph,
   onToggleS3Explorer,
   isS3ExplorerOpen
 }) => {
@@ -299,10 +301,18 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
                 </button>
                 <button 
                   className="config-action-button"
-                  onClick={onExportConfig}
+                  onClick={onExportGraph}
                 >
                   <Download size={14} />
-                  <span>Export Configuration</span>
+                  <span>Export Graph (New Tab)</span>
+                </button>
+                <button 
+                  className="config-action-button"
+                  onClick={onExportConfig}
+                  style={{ opacity: 0.7, fontSize: '11px' }}
+                >
+                  <Download size={12} />
+                  <span>Legacy Export Modal</span>
                 </button>
                 <button 
                   className="config-action-button"

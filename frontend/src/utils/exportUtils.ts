@@ -6,115 +6,181 @@ import {
 } from "../types";
 
 /**
- * Processes inputs for a node by filtering edges targeting this node
+ * Creates a complete node export structure preserving original configuration
+ * and adding instance-specific data (ID, position, user values)
  */
-function processNodeInputs(nodeId: string, edges: CustomEdge[]) {
-  return edges
-    .filter((edge) => edge.target === nodeId)
-    .map((edge) => ({
-      id: edge.id,
-      source_node: edge.source,
-      source_handle: edge.sourceHandle,
-      target: edge.target,
-      target_handle: edge.targetHandle,
-    }));
-}
+function createNodeExport(node: CustomNode) {
+  const baseNode = {
+    id: node.id,
+    position: {
+      x: node.position.x,
+      y: node.position.y,
+    },
+  };
 
-/**
- * Processes outputs for a node by filtering edges originating from this node
- */
-function processNodeOutputs(nodeId: string, edges: CustomEdge[]) {
-  return edges
-    .filter((edge) => edge.source === nodeId)
-    .map((edge) => ({
-      id: edge.id,
-      source_node: edge.source,
-      source_handle: edge.sourceHandle,
-      target: edge.target,
-      target_handle: edge.targetHandle,
-    }));
-}
-
-/**
- * Gets node-specific manual values based on node type
- */
-function getNodeManualValues(node: CustomNode) {
   switch (node.type) {
     case NodeType.INPUT: {
       const inputData = node.data as InputNodeData;
       return {
-        column_names: inputData.column_names || [],
-        source_file: inputData.source_file,
+        ...baseNode,
+        type: "input",
+        configuration: {
+          name: "CSV Input",
+          description: "Input node for CSV data",
+          category: "Input",
+          inputs: [],
+          outputs: (inputData.column_names || []).map((columnName) => ({
+            name: columnName,
+            type: "string",
+            description: `Column: ${columnName}`,
+            path: `output.${columnName}`,
+          })),
+          operations: [
+            {
+              operation: "read_csv",
+              kwargs: {
+                file_path: inputData.source_file || "",
+                columns: inputData.column_names || [],
+              },
+            },
+          ],
+        },
+        instance_data: {
+          column_names: inputData.column_names || [],
+          source_file: inputData.source_file,
+        },
       };
     }
+    
     case NodeType.DYNAMIC: {
       const dynamicData = node.data as DynamicNodeData;
       return {
-        nodeConfigId: dynamicData.nodeConfigId,
-        configName: dynamicData.configName,
-        inputValues: dynamicData.inputValues,
+        ...baseNode,
+        type: "dynamic",
+        configuration: dynamicData.config, // Full configuration preserved
+        instance_data: {
+          nodeConfigId: dynamicData.nodeConfigId,
+          configName: dynamicData.configName,
+          inputValues: dynamicData.inputValues || {},
+        },
       };
     }
+    
     default:
-      return {};
+      return {
+        ...baseNode,
+        type: "unknown",
+        configuration: {
+          name: "Unknown Node",
+          description: "Unknown node type",
+          inputs: [],
+          outputs: [],
+          operations: [],
+        },
+        instance_data: {},
+      };
   }
 }
 
 /**
+ * Creates a clean edge export structure with source/target mapping
+ */
+function createEdgeExport(edge: CustomEdge) {
+  return {
+    id: edge.id,
+    source: {
+      node_id: edge.source,
+      output_handle: edge.sourceHandle,
+    },
+    target: {
+      node_id: edge.target,
+      input_handle: edge.targetHandle,
+    },
+  };
+}
+
+/**
  * Transforms the nodes and edges data into a structured JSON configuration
- * that can be exported and later imported
+ * for downstream processing and API consumption
+ */
+export function generateGraphExportJSON(
+  nodes: CustomNode[],
+  edges: CustomEdge[]
+): string {
+  // Process nodes with full configuration integrity
+  const exportedNodes = nodes.map(createNodeExport);
+  
+  // Process edges with clean source/target mapping
+  const exportedEdges = edges.map(createEdgeExport);
+
+  // Create the final export structure
+  const graphExport = {
+    version: "2.0",
+    metadata: {
+      exported_at: new Date().toISOString(),
+      node_count: nodes.length,
+      edge_count: edges.length,
+      export_format: "graph",
+    },
+    nodes: exportedNodes,
+    edges: exportedEdges,
+  };
+
+  return JSON.stringify(graphExport, null, 2);
+}
+
+/**
+ * Legacy function for backward compatibility - will be deprecated
  */
 export function generateConfigJSON(
   nodes: CustomNode[],
   edges: CustomEdge[]
 ): string {
-  // Create a map of nodes by ID for quick lookup
-  const nodesMap = new Map<string, CustomNode>();
-  nodes.forEach((node) => nodesMap.set(node.id, node));
-
-  // Process each node with a generalized structure
-  const processedNodes = nodes.map((node) => ({
-    id: node.id,
-    type: node.type,
-    position: {
-      x: node.position.x,
-      y: node.position.y,
-    },
-    manual_values: getNodeManualValues(node),
-    inputs: processNodeInputs(node.id, edges),
-    outputs: processNodeOutputs(node.id, edges),
-  }));
-
-  // Create the final configuration object
-  const config = {
-    version: "1.0",
-    nodes: processedNodes,
-    edges: edges.map((edge) => ({
-      id: edge.id,
-      source: edge.source,
-      source_handle: edge.sourceHandle,
-      target: edge.target,
-      target_handle: edge.targetHandle,
-    })),
-  };
-
-  return JSON.stringify(config, null, 2);
+  return generateGraphExportJSON(nodes, edges);
 }
 
 /**
- * Validates if the provided JSON configuration is valid
+ * Validates if the provided JSON export is valid
  */
-export function validateConfigJSON(jsonString: string): boolean {
+export function validateGraphExportJSON(jsonString: string): boolean {
   try {
-    const config = JSON.parse(jsonString);
+    const graphExport = JSON.parse(jsonString);
 
     // Basic validation
-    if (!config.version || !config.nodes || !Array.isArray(config.nodes)) {
+    if (!graphExport.version || !graphExport.nodes || !Array.isArray(graphExport.nodes)) {
       return false;
     }
 
+    if (!graphExport.edges || !Array.isArray(graphExport.edges)) {
+      return false;
+    }
+
+    // Validate node structure
+    for (const node of graphExport.nodes) {
+      if (!node.id || !node.type || !node.configuration) {
+        return false;
+      }
+    }
+
+    // Validate edge structure
+    for (const edge of graphExport.edges) {
+      if (!edge.id || !edge.source || !edge.target) {
+        return false;
+      }
+      if (!edge.source.node_id || !edge.target.node_id) {
+        return false;
+      }
+    }
+
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
+}
+
+/**
+ * Legacy validation function for backward compatibility
+ */
+export function validateConfigJSON(jsonString: string): boolean {
+  return validateGraphExportJSON(jsonString);
 }

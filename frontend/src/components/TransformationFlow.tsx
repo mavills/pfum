@@ -26,6 +26,7 @@ import ExportConfigPanel from './panels/ExportConfigPanel';
 import { NodeType, InputNodeData } from '../types';
 import { createNode, createDynamicNode } from '../utils/nodeUtils';
 import { loadConfigurationsFromPublicDirectory } from '../utils/configLoader';
+import { generateGraphExportJSON } from '../utils/exportUtils';
 
 const nodeTypes = {
   input: InputNode,
@@ -226,6 +227,26 @@ const FlowContent: React.FC = () => {
     // setShowNotification(true);
   }, [nodes, setNodes]);
 
+  // Export graph to new tab
+  const onExportGraph = useCallback(() => {
+    try {
+      const exportData = generateGraphExportJSON(nodes, edges);
+      
+      // Store data in sessionStorage for the new tab
+      sessionStorage.setItem('graph-export-data', exportData);
+      
+      // Open export page in new tab
+      const exportUrl = `${window.location.origin}/export`;
+      window.open(exportUrl, '_blank');
+      
+      console.log('✅ [EXPORT] Graph exported to new tab');
+    } catch (error) {
+      console.error('❌ [EXPORT] Failed to export graph:', error);
+      // Fallback to old export panel
+      setIsExportOpen(true);
+    }
+  }, [nodes, edges]);
+
   // Handle keyboard events for deleting edges
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -256,6 +277,7 @@ const FlowContent: React.FC = () => {
         onAddInputNodeFromS3={onAddInputNodeFromS3}
         onPreviewTransformation={() => setIsPreviewOpen(true)}
         onExportConfig={() => setIsExportOpen(true)}
+        onExportGraph={onExportGraph}
         onToggleS3Explorer={() => setIsS3ExplorerOpen(!isS3ExplorerOpen)}
         isS3ExplorerOpen={isS3ExplorerOpen}
       />
