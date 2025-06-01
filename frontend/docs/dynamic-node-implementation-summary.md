@@ -6,12 +6,14 @@ Your JSON-based dynamic node system is now fully functional with **advanced type
 
 ### Current Status (December 2024)
 ✅ **Fully Working Dynamic Node System**: Complete JSON-based node configuration system  
-✅ **Initialization Fixed**: Default configurations now properly loaded at startup  
+✅ **File-based Configuration Loading**: Configurations now loaded from `public/configs/` directory  
 ✅ **3 Example Configurations**: String to Datetime, String Concatenation, Math Addition  
+✅ **Easy Configuration Management**: JSON files with manifest for organized loading  
 ✅ **Sidebar Integration**: Dynamic nodes appear in "Add Nodes" sidebar by category  
 ✅ **Type-based Handle System**: Automatic handle coloring and connection validation  
 ✅ **Drag & Drop**: Full drag and drop support from sidebar to canvas  
 ✅ **Click to Add**: Alternative click-to-add functionality  
+✅ **Template & Documentation**: Example template and comprehensive README for easy experimentation
 
 ### Testing Instructions
 1. Run `npm run dev` to start the development server
@@ -21,18 +23,41 @@ Your JSON-based dynamic node system is now fully functional with **advanced type
    - **Basic Nodes**: Input Node, Output Node, String Concatenation (legacy)
    - **Data Transformation**: String to Datetime
    - **String Operations**: String Concatenation (dynamic version)
-   - **Math Operations**: Math Addition (new test node)
+   - **Math Operations**: Math Addition
 5. Drag or click any dynamic node to add it to the canvas
 6. Notice different handle colors for different data types (string, number, datetime)
 7. Try connecting handles - type-incompatible connections will be blocked
+
+### File-based Configuration System
+🎯 **Achieved Phase 2**: Local file loading from `public/configs/` directory
+📁 **Configuration Files**: JSON files are automatically loaded from manifest
+🔄 **Hot Reloading**: Add new JSON files and refresh to see new nodes
+📋 **Easy Management**: Well-documented system with templates and examples
+
+### Directory Structure
+```
+public/configs/
+├── README.md                    # Comprehensive documentation
+├── manifest.json               # Configuration index
+├── string-to-datetime.json     # Example: Data transformation
+├── string-concatenation.json   # Example: String operations  
+├── math-addition.json          # Example: Math operations
+├── example-template.json       # Template for new nodes
+└── [your-custom-nodes.json]    # Your experimental configurations
+```
+
+### How to Add New Configurations
+1. **Create JSON file** in `public/configs/` (use `example-template.json` as starting point)
+2. **Add to manifest.json** in the configurations array
+3. **Refresh application** - new node appears in sidebar automatically!
 
 ### Future Vision: Remote Configuration Loading
 📋 **Documented in**: `docs/remote-configuration-vision.md`
 
 The system is designed to evolve through these phases:
-- **Phase 1 (Current)**: Local JSON configurations loaded at startup ✅
-- **Phase 2 (Next)**: File-based loading from local JSON files
-- **Phase 3 (Future)**: Remote API integration with caching
+- **Phase 1**: ~~Local JSON configurations loaded at startup~~ ✅  
+- **Phase 2**: File-based loading from local JSON files ✅ **CURRENT**
+- **Phase 3 (Next)**: Remote API integration with caching
 - **Phase 4 (Advanced)**: Real-time configuration updates and hot reloading
 
 ### Core Components Created

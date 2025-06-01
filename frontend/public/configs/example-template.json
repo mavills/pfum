@@ -1,0 +1,58 @@
+{
+  "name": "Example Template",
+  "description": "A template for creating new dynamic nodes",
+  "category": "Examples",
+  "inputs": [
+    {
+      "name": "Input Text",
+      "type": "string",
+      "description": "Some text input",
+      "path": "operations.0.kwargs.result_col.on.kwargs.input_text",
+      "required": true
+    },
+    {
+      "name": "Input Number",
+      "type": "number",
+      "description": "Some numeric input",
+      "path": "operations.0.kwargs.result_col.on.kwargs.input_number",
+      "default": 42
+    },
+    {
+      "name": "Input Boolean",
+      "type": "boolean",
+      "description": "Some boolean input",
+      "path": "operations.0.kwargs.result_col.on.kwargs.input_boolean",
+      "default": false
+    }
+  ],
+  "outputs": [
+    {
+      "name": "Output Result",
+      "type": "string",
+      "description": "The processed result",
+      "path": "operations.0.kwargs.result_col.kwargs.name"
+    }
+  ],
+  "operations": [
+    {
+      "operation": "with_columns",
+      "kwargs": {
+        "result_col": {
+          "expr": "alias",
+          "on": {
+            "expr": "format",
+            "kwargs": {
+              "template": "Input: {input_text}, Number: {input_number}, Boolean: {input_boolean}",
+              "input_text": "text_input",
+              "input_number": 42,
+              "input_boolean": false
+            }
+          },
+          "kwargs": {
+            "name": "formatted_result"
+          }
+        }
+      }
+    }
+  ]
+} 

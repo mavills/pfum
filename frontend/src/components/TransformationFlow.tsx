@@ -27,7 +27,7 @@ import ExportConfigPanel from './panels/ExportConfigPanel';
 // Types and utilities
 import { NodeType, InputNodeData } from '../types';
 import { createNode, createDynamicNode } from '../utils/nodeUtils';
-import { initializeDefaultConfigurations } from '../services/nodeConfigService';
+import { loadConfigurationsFromPublicDirectory } from '../utils/configLoader';
 
 const nodeTypes = {
   input: InputNode,
@@ -47,9 +47,20 @@ const TransformationFlow: React.FC = () => {
 
 // FlowContent component (the main flow logic)
 const FlowContent: React.FC = () => {
-  // Initialize default configurations on first render
+  // Initialize configurations from files on first render
   useEffect(() => {
-    initializeDefaultConfigurations();
+    const loadConfigurations = async () => {
+      try {
+        console.log('🚀 [APP-INIT] Loading configurations from public directory...');
+        const configIds = await loadConfigurationsFromPublicDirectory();
+        console.log('✅ [APP-INIT] Loaded configurations:', configIds);
+      } catch (error) {
+        console.error('❌ [APP-INIT] Failed to load configurations:', error);
+        // Fallback to empty state - user can still use basic nodes
+      }
+    };
+    
+    loadConfigurations();
   }, []);
 
   // State for nodes and edges

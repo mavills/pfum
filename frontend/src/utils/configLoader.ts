@@ -10,6 +10,79 @@ import { nodeConfigService } from '../services/nodeConfigService';
  * - Environment variables or build-time configuration
  */
 
+// Load configurations from the public/configs directory
+export async function loadConfigurationsFromPublicDirectory(): Promise<string[]> {
+  try {
+    // First, load the manifest to know which files to load
+    const manifestResponse = await fetch('/configs/manifest.json');
+    if (!manifestResponse.ok) {
+      throw new Error(`Failed to load manifest: ${manifestResponse.status}`);
+    }
+    
+    const manifest = await manifestResponse.json();
+    const configIds: string[] = [];
+    
+    console.log('📋 [CONFIG-LOADER] Loading configurations from manifest:', manifest);
+    
+    // Load each configuration file listed in the manifest
+    for (const configInfo of manifest.configurations) {
+      try {
+        console.log(`📁 [CONFIG-LOADER] Loading ${configInfo.file}...`);
+        
+        const configResponse = await fetch(`/configs/${configInfo.file}`);
+        if (!configResponse.ok) {
+          console.warn(`Failed to load ${configInfo.file}: ${configResponse.status}`);
+          continue;
+        }
+        
+        const config: NodeConfiguration = await configResponse.json();
+        
+        // Validate the configuration
+        if (!isValidNodeConfiguration(config)) {
+          console.warn(`Invalid configuration in ${configInfo.file}`);
+          continue;
+        }
+        
+        // Load the configuration into the service
+        const configId = nodeConfigService.loadConfiguration(config);
+        configIds.push(configId);
+        
+        console.log(`✅ [CONFIG-LOADER] Loaded ${config.name} (${configId})`);
+        
+      } catch (error) {
+        console.error(`Failed to load configuration from ${configInfo.file}:`, error);
+      }
+    }
+    
+    console.log(`🎉 [CONFIG-LOADER] Successfully loaded ${configIds.length} configurations`);
+    return configIds;
+    
+  } catch (error) {
+    console.error('Failed to load configurations from public directory:', error);
+    throw error;
+  }
+}
+
+// Load a single configuration file from the public directory
+export async function loadConfigurationFromPublicFile(filename: string): Promise<string> {
+  try {
+    const response = await fetch(`/configs/${filename}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const config: NodeConfiguration = await response.json();
+    
+    if (!isValidNodeConfiguration(config)) {
+      throw new Error(`Invalid configuration format in ${filename}`);
+    }
+    
+    return nodeConfigService.loadConfiguration(config);
+  } catch (error) {
+    throw new Error(`Failed to load configuration from ${filename}: ${error}`);
+  }
+}
+
 // Example function to load from a JSON file (client-side)
 export async function loadConfigurationFromFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {

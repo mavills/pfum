@@ -1,15 +1,38 @@
 import { NodeConfiguration } from '../types/nodeConfig';
 
+// Simple event emitter for configuration changes
+type ConfigurationEventListener = () => void;
+
 // In a real application, this would load from actual files or an API
 // For now, we'll store configurations in memory and provide methods to add them
 
 class NodeConfigService {
   private configurations: Map<string, NodeConfiguration> = new Map();
+  private listeners: ConfigurationEventListener[] = [];
+  
+  // Add event listener for configuration changes
+  addListener(listener: ConfigurationEventListener): void {
+    this.listeners.push(listener);
+  }
+  
+  // Remove event listener
+  removeListener(listener: ConfigurationEventListener): void {
+    const index = this.listeners.indexOf(listener);
+    if (index > -1) {
+      this.listeners.splice(index, 1);
+    }
+  }
+  
+  // Notify all listeners of configuration changes
+  private notifyListeners(): void {
+    this.listeners.forEach(listener => listener());
+  }
   
   // Load a configuration (in a real app, this might read from disk or API)
   loadConfiguration(config: NodeConfiguration): string {
     const id = this.generateConfigId(config.name);
     this.configurations.set(id, config);
+    this.notifyListeners(); // Notify listeners of the change
     return id;
   }
   
@@ -32,7 +55,17 @@ class NodeConfigService {
   
   // Remove a configuration
   removeConfiguration(id: string): boolean {
-    return this.configurations.delete(id);
+    const result = this.configurations.delete(id);
+    if (result) {
+      this.notifyListeners(); // Notify listeners of the change
+    }
+    return result;
+  }
+  
+  // Clear all configurations (useful for reloading)
+  clearAllConfigurations(): void {
+    this.configurations.clear();
+    this.notifyListeners(); // Notify listeners of the change
   }
   
   // Generate a unique ID for a configuration
@@ -51,7 +84,13 @@ class NodeConfigService {
   
   // Load configurations from JSON array (useful for bulk loading)
   loadConfigurationsFromArray(configs: NodeConfiguration[]): string[] {
-    return configs.map(config => this.loadConfiguration(config));
+    const configIds = configs.map(config => {
+      const id = this.generateConfigId(config.name);
+      this.configurations.set(id, config);
+      return id;
+    });
+    this.notifyListeners(); // Single notification for bulk changes
+    return configIds;
   }
   
   // Export all configurations as JSON
@@ -62,181 +101,5 @@ class NodeConfigService {
 
 // Create a singleton instance
 export const nodeConfigService = new NodeConfigService();
-
-// Initialize with some default configurations
-export function initializeDefaultConfigurations() {
-  // Example: String to Datetime node configuration
-  const stringToDatetimeConfig: NodeConfiguration = {
-    name: "String to Datetime",
-    description: "Convert a string to a datetime using a specified format",
-    category: "Data Transformation",
-    inputs: [
-      {
-        name: "Date String Source",
-        type: "string",
-        description: "The string to convert to a datetime",
-        path: "operations.0.kwargs.converted_datetime_col.on.on.kwargs.name",
-        required: true
-      },
-      {
-        name: "Format",
-        type: "string",
-        description: "The format of the datetime string",
-        path: "operations.0.kwargs.converted_datetime_col.on.kwargs.format",
-        default: "%Y-%m-%d %H:%M:%S"
-      }
-    ],
-    outputs: [
-      {
-        name: "Converted Datetime",
-        type: "datetime",
-        description: "The converted datetime",
-        path: "operations.0.kwargs.converted_datetime_col.kwargs.name"
-      }
-    ],
-    operations: [
-      {
-        operation: "with_columns",
-        kwargs: {
-          converted_datetime_col: {
-            expr: "alias",
-            on: {
-              expr: "str.to_datetime",
-              on: {
-                expr: "col",
-                kwargs: {
-                  name: "date_string_source"
-                }
-              },
-              kwargs: {
-                format: "%Y-%m-%d %H:%M:%S"
-              }
-            },
-            kwargs: {
-              name: "parsed_datetime_output"
-            }
-          }
-        }
-      }
-    ]
-  };
-  
-  // Example: String Concatenation node
-  const stringConcatConfig: NodeConfiguration = {
-    name: "String Concatenation",
-    description: "Concatenate two strings with a separator",
-    category: "String Operations",
-    inputs: [
-      {
-        name: "First String",
-        type: "string",
-        description: "The first string to concatenate",
-        path: "operations.0.kwargs.result_col.on.kwargs.exprs.0.kwargs.name",
-        required: true
-      },
-      {
-        name: "Second String", 
-        type: "string",
-        description: "The second string to concatenate",
-        path: "operations.0.kwargs.result_col.on.kwargs.exprs.1.kwargs.name",
-        required: true
-      },
-      {
-        name: "Separator",
-        type: "string",
-        description: "Separator between strings",
-        path: "operations.0.kwargs.result_col.on.kwargs.separator",
-        default: "_"
-      }
-    ],
-    outputs: [
-      {
-        name: "Concatenated String",
-        type: "string", 
-        description: "The result of concatenation",
-        path: "operations.0.kwargs.result_col.kwargs.name"
-      }
-    ],
-    operations: [
-      {
-        operation: "with_columns",
-        kwargs: {
-          result_col: {
-            expr: "alias",
-            on: {
-              expr: "concat_str",
-              kwargs: {
-                exprs: [
-                  { expr: "col", kwargs: { name: "first_string" } },
-                  { expr: "col", kwargs: { name: "second_string" } }
-                ],
-                separator: "_"
-              }
-            },
-            kwargs: {
-              name: "concatenated_result"
-            }
-          }
-        }
-      }
-    ]
-  };
-  
-  nodeConfigService.loadConfiguration(stringToDatetimeConfig);
-  nodeConfigService.loadConfiguration(stringConcatConfig);
-  
-  // Example: Simple Math Addition node for testing
-  const mathAdditionConfig: NodeConfiguration = {
-    name: "Math Addition",
-    description: "Add two numbers together",
-    category: "Math Operations",
-    inputs: [
-      {
-        name: "First Number",
-        type: "number",
-        description: "The first number to add",
-        path: "operations.0.kwargs.result_col.on.kwargs.left",
-        required: true
-      },
-      {
-        name: "Second Number",
-        type: "number", 
-        description: "The second number to add",
-        path: "operations.0.kwargs.result_col.on.kwargs.right",
-        required: true
-      }
-    ],
-    outputs: [
-      {
-        name: "Sum",
-        type: "number",
-        description: "The sum of the two numbers",
-        path: "operations.0.kwargs.result_col.kwargs.name"
-      }
-    ],
-    operations: [
-      {
-        operation: "with_columns",
-        kwargs: {
-          result_col: {
-            expr: "alias",
-            on: {
-              expr: "add",
-              kwargs: {
-                left: { expr: "col", kwargs: { name: "first_number" } },
-                right: { expr: "col", kwargs: { name: "second_number" } }
-              }
-            },
-            kwargs: {
-              name: "sum_result"
-            }
-          }
-        }
-      }
-    ]
-  };
-  
-  nodeConfigService.loadConfiguration(mathAdditionConfig);
-}
 
 export default nodeConfigService; 

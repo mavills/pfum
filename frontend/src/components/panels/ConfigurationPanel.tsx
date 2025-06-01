@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
 import { 
   ChevronDown, 
@@ -14,7 +14,8 @@ import {
   Eye,
   Download,
   Search,
-  X
+  X,
+  RefreshCw
 } from 'lucide-react';
 import { NodeType } from '../../types';
 import { nodeConfigService } from '../../services/nodeConfigService';
@@ -164,8 +165,36 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Get available dynamic node configurations
-  const dynamicConfigs = nodeConfigService.getAllConfigurations();
+  // Dynamic configurations state - force re-render when configurations change
+  const [dynamicConfigs, setDynamicConfigs] = useState(() => nodeConfigService.getAllConfigurations());
+  const [configsLoaded, setConfigsLoaded] = useState(false);
+
+  // Refresh configurations from the service
+  const refreshConfigurations = useCallback(() => {
+    const configs = nodeConfigService.getAllConfigurations();
+    setDynamicConfigs(configs);
+    setConfigsLoaded(true);
+    console.log('🔄 [CONFIG-PANEL] Refreshed configurations:', configs.length);
+  }, []);
+
+  // Listen for configuration changes
+  useEffect(() => {
+    // Initial load
+    refreshConfigurations();
+    
+    // Set up listener for configuration changes
+    const handleConfigurationChange = () => {
+      console.log('📡 [CONFIG-PANEL] Configuration change detected, updating...');
+      refreshConfigurations();
+    };
+    
+    nodeConfigService.addListener(handleConfigurationChange);
+    
+    // Cleanup listener on unmount
+    return () => {
+      nodeConfigService.removeListener(handleConfigurationChange);
+    };
+  }, [refreshConfigurations]);
   
   // Group dynamic configurations by category
   const dynamicCategories = dynamicConfigs.reduce((acc, { id, config }) => {
@@ -318,10 +347,27 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
             <Accordion.Trigger className="config-accordion-trigger">
               <Sparkles size={16} />
               <span>Add Nodes</span>
+              <span className="config-node-count">({dynamicConfigs.length} dynamic)</span>
               <ChevronDown size={14} className="config-accordion-chevron" />
             </Accordion.Trigger>
             <Accordion.Content className="config-accordion-content">
               <div className="config-section-content">
+                
+                {/* Configuration Status & Refresh */}
+                <div className="config-status-bar">
+                  <div className="config-status-info">
+                    <span className="config-status-text">
+                      {configsLoaded ? `${dynamicConfigs.length} configurations loaded` : 'Loading configurations...'}
+                    </span>
+                  </div>
+                  <button 
+                    className="config-refresh-button"
+                    onClick={refreshConfigurations}
+                    title="Refresh configurations"
+                  >
+                    <RefreshCw size={12} />
+                  </button>
+                </div>
                 
                 {/* Basic Nodes */}
                 <div className="config-subsection">
@@ -343,25 +389,33 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
                 </div>
 
                 {/* Dynamic Node Categories */}
-                {Object.entries(dynamicCategories).map(([categoryName, configs]) => (
-                  <div key={categoryName} className="config-subsection">
-                    <div className="config-subsection-title">{categoryName}</div>
-                    <div className="config-node-list">
-                      {configs.map(({ id, config }) => (
-                        <DraggableNode
-                          key={id}
-                          type="dynamic"
-                          configId={id}
-                          title={config.name}
-                          description={config.description || 'Custom node configuration'}
-                          icon={<Sparkles size={14} />}
-                          onAddNode={onAddNode}
-                          onAddDynamicNode={onAddDynamicNode}
-                        />
-                      ))}
-                    </div>
+                {Object.keys(dynamicCategories).length === 0 ? (
+                  <div className="config-empty-state">
+                    No dynamic configurations loaded yet.
+                    <br />
+                    <small>Configurations should load automatically from /configs/</small>
                   </div>
-                ))}
+                ) : (
+                  Object.entries(dynamicCategories).map(([categoryName, configs]) => (
+                    <div key={categoryName} className="config-subsection">
+                      <div className="config-subsection-title">{categoryName} ({configs.length})</div>
+                      <div className="config-node-list">
+                        {configs.map(({ id, config }) => (
+                          <DraggableNode
+                            key={id}
+                            type="dynamic"
+                            configId={id}
+                            title={config.name}
+                            description={config.description || 'Custom node configuration'}
+                            icon={<Sparkles size={14} />}
+                            onAddNode={onAddNode}
+                            onAddDynamicNode={onAddDynamicNode}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </Accordion.Content>
           </Accordion.Item>

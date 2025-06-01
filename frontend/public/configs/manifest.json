@@ -1,0 +1,26 @@
+{
+  "version": "1.0.0",
+  "configurations": [
+    {
+      "id": "string-to-datetime",
+      "file": "string-to-datetime.json",
+      "name": "String to Datetime",
+      "category": "Data Transformation",
+      "description": "Convert a string to a datetime using a specified format"
+    },
+    {
+      "id": "string-concatenation",
+      "file": "string-concatenation.json",
+      "name": "String Concatenation",
+      "category": "String Operations",
+      "description": "Concatenate two strings with a separator"
+    },
+    {
+      "id": "math-addition",
+      "file": "math-addition.json",
+      "name": "Math Addition",
+      "category": "Math Operations",
+      "description": "Add two numbers together"
+    }
+  ]
+} 

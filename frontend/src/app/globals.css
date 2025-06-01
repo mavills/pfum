@@ -1304,6 +1304,82 @@ html, body {
   text-overflow: ellipsis;
 }
 
+/* Configuration Status Bar */
+.config-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: #37373a;
+  border: 1px solid #464647;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.config-status-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.config-status-text {
+  font-size: var(--font-size-xs);
+  color: #cccccc;
+}
+
+.config-refresh-button {
+  background: none;
+  border: 1px solid #464647;
+  border-radius: var(--radius-xs);
+  color: #999999;
+  padding: var(--spacing-xs);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  transition: all 0.15s ease;
+}
+
+.config-refresh-button:hover {
+  background-color: #404041;
+  color: #cccccc;
+  border-color: #5a5a5c;
+}
+
+.config-refresh-button:active {
+  background-color: #4a4a4c;
+}
+
+/* Node Count Indicator */
+.config-node-count {
+  font-size: 10px;
+  color: #666666;
+  font-weight: normal;
+  margin-left: var(--spacing-xs);
+}
+
+/* Enhanced Empty State */
+.config-empty-state {
+  text-align: center;
+  color: #666666;
+  font-size: var(--font-size-xs);
+  padding: var(--spacing-lg);
+  font-style: italic;
+  background-color: #37373a;
+  border: 1px dashed #464647;
+  border-radius: var(--radius-sm);
+  margin: var(--spacing-md) 0;
+}
+
+.config-empty-state small {
+  font-size: 10px;
+  color: #555555;
+  display: block;
+  margin-top: var(--spacing-xs);
+}
+
 /* Search Components */
 .config-search-container {
   margin-bottom: var(--spacing-md);
