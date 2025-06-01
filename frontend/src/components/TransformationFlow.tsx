@@ -13,12 +13,10 @@ import {
   Node,
   Edge
 } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
+import '@xyflow/react/dist/base.css';
 
 // Components
 import InputNode from './nodes/InputNode';
-import OutputNode from './nodes/OutputNode';
-import StringConcatNode from './nodes/StringConcatNode';
 import DynamicNode from './nodes/DynamicNode';
 import ConfigurationPanel from './panels/ConfigurationPanel';
 import PreviewPanel from './panels/PreviewPanel';
@@ -31,8 +29,6 @@ import { loadConfigurationsFromPublicDirectory } from '../utils/configLoader';
 
 const nodeTypes = {
   input: InputNode,
-  output: OutputNode,
-  string_concat: StringConcatNode,
   dynamic: DynamicNode,
 };
 

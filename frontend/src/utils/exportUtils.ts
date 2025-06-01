@@ -2,8 +2,7 @@ import { CustomNode, CustomEdge } from "../types";
 import {
   NodeType,
   InputNodeData,
-  OutputNodeData,
-  StringConcatNodeData,
+  DynamicNodeData,
 } from "../types";
 
 /**
@@ -45,21 +44,15 @@ function getNodeManualValues(node: CustomNode) {
       const inputData = node.data as InputNodeData;
       return {
         column_names: inputData.column_names || [],
+        source_file: inputData.source_file,
       };
     }
-    case NodeType.OUTPUT: {
-      const outputData = node.data as OutputNodeData;
+    case NodeType.DYNAMIC: {
+      const dynamicData = node.data as DynamicNodeData;
       return {
-        entity_type: outputData.entity_type,
-        field_values: outputData.field_values || {},
-      };
-    }
-    case NodeType.STRING_CONCAT: {
-      const stringConcatData = node.data as StringConcatNodeData;
-      return {
-        separator: stringConcatData.separator,
-        input_1: stringConcatData.input_1 || "",
-        input_2: stringConcatData.input_2 || "",
+        nodeConfigId: dynamicData.nodeConfigId,
+        configName: dynamicData.configName,
+        inputValues: dynamicData.inputValues,
       };
     }
     default:

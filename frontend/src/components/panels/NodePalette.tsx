@@ -127,20 +127,6 @@ const NodePalette: React.FC<NodePaletteProps> = ({ onAddNode, onAddDynamicNode }
       description: 'Define CSV column structure',
       icon: <FileInput size={16} />
     },
-    {
-      type: 'basic' as const,
-      nodeType: NodeType.OUTPUT,
-      title: 'Output Node', 
-      description: 'Define output entity structure',
-      icon: <FileOutput size={16} />
-    },
-    {
-      type: 'basic' as const,
-      nodeType: NodeType.STRING_CONCAT,
-      title: 'String Concatenation',
-      description: 'Combine strings with separator',
-      icon: <Type size={16} />
-    }
   ];
 
   if (isCollapsed) {

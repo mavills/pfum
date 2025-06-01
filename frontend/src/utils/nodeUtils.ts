@@ -1,5 +1,5 @@
 import { Node } from '@xyflow/react';
-import { NodeType, InputNodeData, OutputNodeData, StringConcatNodeData, EntityType, DynamicNodeData } from '../types';
+import { NodeType, InputNodeData, DynamicNodeData } from '../types';
 import { NodeConfiguration, isDynamicNode } from '../types/nodeConfig';
 import { nodeConfigService } from '../services/nodeConfigService';
 import { areTypesCompatible } from '../components/nodes/HandleStyles';
@@ -25,15 +25,6 @@ export const createNode = (
     case NodeType.INPUT:
       (node.data as unknown as InputNodeData).column_names = [];
       break;
-    case NodeType.OUTPUT:
-      (node.data as unknown as OutputNodeData).entity_type = EntityType.COURSES;
-      (node.data as unknown as OutputNodeData).field_values = {};
-      break;
-    case NodeType.STRING_CONCAT:
-      (node.data as unknown as StringConcatNodeData).separator = '_';
-      (node.data as unknown as StringConcatNodeData).input_1 = '';
-      (node.data as unknown as StringConcatNodeData).input_2 = '';
-      break;
     case NodeType.DYNAMIC:
       // Dynamic nodes should be created using createDynamicNode instead
       throw new Error('Use createDynamicNode for dynamic nodes');
@@ -42,31 +33,21 @@ export const createNode = (
   return node;
 };
 
-// New function to create dynamic nodes from configuration
 export const createDynamicNode = (
   configId: string,
   position: { x: number; y: number }
 ): Node => {
   const config = nodeConfigService.getConfiguration(configId);
   if (!config) {
-    throw new Error(`Node configuration not found: ${configId}`);
+    throw new Error(`Configuration not found: ${configId}`);
   }
 
   const id = `node_${nodeId++}`;
-  
-  // Initialize input values with defaults
-  const inputValues: Record<string, string | number | boolean> = {};
-  config.inputs.forEach(input => {
-    if (input.default !== undefined) {
-      inputValues[input.name] = input.default;
-    }
-  });
-
   const nodeData: DynamicNodeData = {
     type: 'dynamic',
     nodeConfigId: configId,
     configName: config.name,
-    inputValues,
+    inputValues: {},
     config
   };
 
@@ -78,14 +59,10 @@ export const createDynamicNode = (
   };
 };
 
-export const getNodeLabel = (type: NodeType): string => {
+const getNodeLabel = (type: NodeType): string => {
   switch (type) {
     case NodeType.INPUT:
-      return 'Input';
-    case NodeType.OUTPUT:
-      return 'Output';
-    case NodeType.STRING_CONCAT:
-      return 'String Concat';
+      return 'CSV Input';
     case NodeType.DYNAMIC:
       return 'Dynamic Node';
     default:
@@ -124,11 +101,8 @@ function getHandleDataType(
   switch (node.type) {
     case NodeType.INPUT:
       return 'string'; // Input nodes output strings
-    case NodeType.OUTPUT:
-      return 'string'; // Output nodes accept strings
-    case NodeType.STRING_CONCAT:
-      if (isOutput) return 'string';
-      return 'string'; // String concat accepts strings
+    case NodeType.DYNAMIC:
+      return 'string'; // Dynamic nodes - type should be determined from config above
     default:
       return undefined; // Unknown type
   }

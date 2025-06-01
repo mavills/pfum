@@ -5,9 +5,7 @@ import * as Accordion from '@radix-ui/react-accordion';
 import { 
   ChevronDown, 
   GripVertical, 
-  FileInput, 
-  FileOutput, 
-  Type, 
+  FileInput,
   Sparkles,
   Settings,
   FolderOpen,
@@ -206,31 +204,6 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
     return acc;
   }, {} as Record<string, Array<{ id: string; config: { name: string; description?: string; category?: string } }>>);
 
-  // Basic node definitions
-  const basicNodes = [
-    {
-      type: 'basic' as const,
-      nodeType: NodeType.INPUT,
-      title: 'Input Node',
-      description: 'Define CSV column structure',
-      icon: <FileInput size={14} />
-    },
-    {
-      type: 'basic' as const,
-      nodeType: NodeType.OUTPUT,
-      title: 'Output Node', 
-      description: 'Define output entity structure',
-      icon: <FileOutput size={14} />
-    },
-    {
-      type: 'basic' as const,
-      nodeType: NodeType.STRING_CONCAT,
-      title: 'String Concatenation',
-      description: 'Combine strings with separator',
-      icon: <Type size={14} />
-    }
-  ];
-
   // Fetch S3 files when prefix changes
   useEffect(() => {
     if (!isS3ExplorerOpen) return;
@@ -369,25 +342,22 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
                   </button>
                 </div>
                 
-                {/* Basic Nodes */}
+                {/* Input Nodes */}
                 <div className="config-subsection">
-                  <div className="config-subsection-title">Basic Nodes</div>
+                  <div className="config-subsection-title">Input</div>
                   <div className="config-node-list">
-                    {basicNodes.map((node) => (
-                      <DraggableNode
-                        key={`basic-${node.nodeType}`}
-                        type={node.type}
-                        nodeType={node.nodeType}
-                        title={node.title}
-                        description={node.description}
-                        icon={node.icon}
-                        onAddNode={onAddNode}
-                        onAddDynamicNode={onAddDynamicNode}
-                      />
-                    ))}
+                    <DraggableNode
+                      type="basic"
+                      nodeType={NodeType.INPUT}
+                      title="CSV Input"
+                      description="Define CSV column structure manually"
+                      icon={<FileInput size={14} />}
+                      onAddNode={onAddNode}
+                      onAddDynamicNode={onAddDynamicNode}
+                    />
                   </div>
                 </div>
-
+                
                 {/* Dynamic Node Categories */}
                 {Object.keys(dynamicCategories).length === 0 ? (
                   <div className="config-empty-state">
