@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import "@xyflow/react/dist/base.css";
 import "./styling/globals.css";
-import "./styling/configPanel.css";
+import "./styling/config-panel/base.css";
+import "./styling/config-panel/draggable.css";
 import "./styling/react-flow/handles.css";
 import "./styling/react-flow/nodes.css";
 

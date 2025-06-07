@@ -1,0 +1,66 @@
+/* Node Items */
+.config-draggable__item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: #37373a;
+  border: 1px solid #464647;
+  border-radius: var(--radius-sm);
+  color: #cccccc;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  min-height: 28px;
+}
+
+.config-draggable__item:hover {
+  background-color: #404041;
+  border-color: #5a5a5c;
+  /* transform: translateY(-1px); */
+}
+
+.config-draggable__item:active {
+  background-color: #383839;
+  transform: translateY(0);
+}
+
+.config-draggable__drag-handle {
+  color: #666666;
+  display: flex;
+  align-items: center;
+  cursor: grab;
+}
+
+.config-draggable__drag-handle:active {
+  cursor: grabbing;
+}
+
+.config-draggable__icon {
+  color: #999999;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.config-draggable__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.config-draggable__title {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: #cccccc;
+  line-height: 1.2;
+  margin-bottom: 1px;
+}
+
+.config-draggable__description {
+  font-size: 10px;
+  color: #999999;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
