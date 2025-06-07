@@ -19,7 +19,7 @@ import {
 // Components
 import InputNode from "./nodes/InputNode";
 import DynamicNode from "./nodes/DynamicNode";
-import ConfigurationPanel from "./panels/ConfigurationPanel";
+import ConfigurationPanel from "./panels/configuration/ConfigurationPanel";
 import PreviewPanel from "./panels/PreviewPanel";
 import ExportConfigPanel from "./panels/ExportConfigPanel";
 

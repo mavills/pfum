@@ -1,8 +1,7 @@
-import { Node } from '@xyflow/react';
-import { NodeType, InputNodeData, DynamicNodeData } from '../types';
-import { NodeConfiguration, isDynamicNode } from '../types/nodeConfig';
-import { nodeConfigService } from '../services/nodeConfigService';
-import { areTypesCompatible } from '../components/nodes/HandleStyles';
+import { Node } from "@xyflow/react";
+import { NodeType, InputNodeData, DynamicNodeData } from "../types";
+import { isDynamicNode } from "../types/nodeConfig";
+import { nodeConfigService } from "../services/nodeConfigService";
 
 let nodeId = 0;
 
@@ -11,7 +10,7 @@ export const createNode = (
   position: { x: number; y: number }
 ): Node => {
   const id = `node_${nodeId++}`;
-  
+
   // Base node properties
   const node: Node = {
     id,
@@ -19,7 +18,7 @@ export const createNode = (
     position,
     data: { label: getNodeLabel(type), type },
   };
-  
+
   // Add type-specific data
   switch (type) {
     case NodeType.INPUT:
@@ -27,9 +26,9 @@ export const createNode = (
       break;
     case NodeType.DYNAMIC:
       // Dynamic nodes should be created using createDynamicNode instead
-      throw new Error('Use createDynamicNode for dynamic nodes');
+      throw new Error("Use createDynamicNode for dynamic nodes");
   }
-  
+
   return node;
 };
 
@@ -44,11 +43,11 @@ export const createDynamicNode = (
 
   const id = `node_${nodeId++}`;
   const nodeData: DynamicNodeData = {
-    type: 'dynamic',
+    type: "dynamic",
     nodeConfigId: configId,
     configName: config.name,
     inputValues: {},
-    config
+    config,
   };
 
   return {
@@ -62,11 +61,11 @@ export const createDynamicNode = (
 const getNodeLabel = (type: NodeType): string => {
   switch (type) {
     case NodeType.INPUT:
-      return 'CSV Input';
+      return "CSV Input";
     case NodeType.DYNAMIC:
-      return 'Dynamic Node';
+      return "Dynamic Node";
     default:
-      return 'Unknown Node';
+      return "Unknown Node";
   }
 };
 
@@ -81,17 +80,20 @@ function getHandleDataType(
   // Check if it's a dynamic node
   if (isDynamicNode(node.data)) {
     const config = node.data.config;
-    
+
     if (isOutput) {
       // Find output type by handle ID
-      const output = config.outputs.find(output => 
-        `output-${output.name.toLowerCase().replace(/\s+/g, '-')}` === handleId
+      const output = config.outputs.find(
+        (output) =>
+          `output-${output.name.toLowerCase().replace(/\s+/g, "-")}` ===
+          handleId
       );
       return output?.type;
     } else {
-      // Find input type by handle ID  
-      const input = config.inputs.find(input =>
-        `input-${input.name.toLowerCase().replace(/\s+/g, '-')}` === handleId
+      // Find input type by handle ID
+      const input = config.inputs.find(
+        (input) =>
+          `input-${input.name.toLowerCase().replace(/\s+/g, "-")}` === handleId
       );
       return input?.type;
     }
@@ -100,9 +102,9 @@ function getHandleDataType(
   // For legacy nodes, return default types based on node type
   switch (node.type) {
     case NodeType.INPUT:
-      return 'string'; // Input nodes output strings
+      return "string"; // Input nodes output strings
     case NodeType.DYNAMIC:
-      return 'string'; // Dynamic nodes - type should be determined from config above
+      return "string"; // Dynamic nodes - type should be determined from config above
     default:
       return undefined; // Unknown type
   }
@@ -130,4 +132,4 @@ export const isValidConnection = (
 // Helper to get all available node configurations
 export const getAvailableNodeConfigurations = () => {
   return nodeConfigService.getAllConfigurations();
-}; 
+};
