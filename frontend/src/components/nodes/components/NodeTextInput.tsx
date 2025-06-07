@@ -9,7 +9,7 @@ interface NodeTextInputProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  hasInput?: boolean;
+  isEditable?: boolean;
   hasOutput?: boolean;
   inputHandleId?: string;
   inputDataType?: string; // Data type for input handle
@@ -23,7 +23,7 @@ const NodeTextInput: React.FC<NodeTextInputProps> = ({
   value,
   onChange,
   placeholder = "",
-  hasInput = false,
+  isEditable = true,
   inputHandleId = "input",
   inputDataType,
   isConnected = false,
@@ -39,7 +39,7 @@ const NodeTextInput: React.FC<NodeTextInputProps> = ({
         <span className="">{label}</span>
 
         {/* Hide the input if connected */}
-        {(!isConnected || !hasInput) && (
+        {!isConnected && isEditable && (
           <input
             type="text"
             value={value}

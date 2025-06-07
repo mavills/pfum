@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "operators": [
+    {
+      "file": "string-to-datetime.json"
+    }
+  ]
+}

@@ -96,7 +96,7 @@ const DynamicNode: React.FC<NodeProps> = ({ data, id }) => {
               value={getInputValue(input.name)}
               onChange={(value) => handleInputChange(input.name, value)}
               placeholder={input.description}
-              hasInput={true}
+              isEditable={true}
               inputHandleId={getInputHandleId(input.name)}
               inputDataType={input.type}
               isConnected={isInputConnected(input.name)}

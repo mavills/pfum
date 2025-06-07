@@ -1,0 +1,65 @@
+{
+    "title": "...",
+    "icon": "...", // optional icon, from a list of allowed icons
+    "description": "...", // markdown-allowed help description?
+    "id": "...", // unique identifier of the template. Starts of emtpy, because is not unique in its template of course.
+    "type": "...", // a generic type name that can be used later to see which template "type" was used
+    "category": "...", // category of the operator, used for grouping and filtering operations
+    "groups": [
+        "..." // define a list of groups for the operator, ordered. If not specified, ordered alphabetically; if group missing, ordered alphabetically at the end
+    ],
+    "inputs": [
+        {
+            "id": "...", // making this input unique per template, will be used to fill in the steps. we need to be sure these are not one of the reserved key-words for variables
+            "type": "string", // indicates the type of the input, forcing connections to be of a certain type to be valid for this!
+            "name": "...", // will be used to display what this input is about
+            "description": "...", // helper text for rendering documentation in the node-editor
+            "validation": { // extra validation rules to be applied, mostly used for
+                "regex": "...", // for example, regex
+                "enum": [ // or when type is "enum" (a string with fixed values), list the different accepted values
+                    "string 1",
+                    "string 2",
+                    "..."
+                ]
+            },
+            "group": "...", // group inputs and outputs together for easier interface manipulation
+            "position": 3, // int used to sort inputs and outputs by; a bit like a z-index in css. positioning happens within a group
+            "default": "...", // a default value that is set when the node is created. Will be used as placeholder when no value is set.
+            "editable": true, // indicates if the edit option should be available. For example, for a field that indicates unique ID's, it does not make sense to set it to a constant.
+            "required": true // some inputs do not make sense to be empty (for example, primary keys).
+        }
+    ],
+    "outputs": [
+        {
+            "id": "...",
+            "type": "...",
+            "name": "...",
+            "description": "...", // helper text for rendering documentation in the node-editor
+            "group": "...", // group inputs and outputs together for easier interface manipulation
+            // "default": ... // it does not make sense to have a default on outputs.
+            "position": 20, // similar to inputs, used to re-order
+            "editable": true // happens in the case of custom inputs to the system, so an input node with "starter outputs"
+        }
+    ],
+    // dynamics are the way to have the interface be extendable from config.
+    // For example, if a node has an extendable amount of inputs, we want to be able to update the interface without coding custom nodes.
+    "dynamics": [
+        { // each dynamic defines what inputs, outputs, and config it will add. This must be flexible so we can no longer hard-code.
+            "method": "button", // I imagine this is one of: button, connection.
+            "method_data": {
+                "name": "..."
+            }
+        }
+    ],
+    "config": { // the front-end application shouldn't care too much about config
+        // variables are used to manipulate the steps after compilation.
+        // We actually don't need those as there will be a small set of hard-coded variables when we run the application.
+        // We need to define those though, so for now we will keep them in.
+        "steps": [
+            { // can be literally anything, the front-end should not care.
+                "a": "$b", // see polars as config, this refers to a variable
+                "b": "$$c" // see polars as config, this refers to "$c", using the escaped $$
+            }
+        ]
+    }
+}

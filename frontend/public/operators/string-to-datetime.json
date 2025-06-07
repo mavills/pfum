@@ -1,0 +1,73 @@
+{
+  "title": "Parse Datetime",
+  "icon": "calendar",
+  "description": "Convert a string to a datetime using a specified format",
+  "id": "string-to-datetime",
+  "type": "string-to-datetime",
+  "groups": [
+    "inputs",
+    "outputs"
+  ],
+  "category": "datetime",
+  "inputs": [
+    {
+      "id": "date-string-source",
+      "type": "string",
+      "name": "Datetime String",
+      "description": "The string to convert to a datetime",
+      "validation": {},
+      "group": "inputs",
+      "default": "2021-01-01 12:00:00",
+      "editable": true,
+      "required": true
+    },
+    {
+      "id": "format",
+      "type": "string",
+      "name": "Format",
+      "description": "The format of the datetime string",
+      "validation": {},
+      "group": "inputs",
+      "default": "%Y-%m-%d %H:%M:%S",
+      "editable": true,
+      "required": true
+    }
+  ],
+  "outputs": [
+    {
+      "id": "converted-datetime",
+      "type": "datetime",
+      "name": "Converted Datetime",
+      "description": "The converted datetime",
+      "group": "outputs",
+      "editable": false
+    }
+  ],
+  "config": {
+    "steps": [
+      {
+        "operation": "with_columns",
+        "kwargs": {
+          "converted_datetime_col": {
+            "expr": "alias",
+            "on": {
+              "expr": "str.to_datetime",
+              "on": {
+                "expr": "col",
+                "kwargs": {
+                  "name": "date_string_source"
+                }
+              },
+              "kwargs": {
+                "format": "%Y-%m-%d %H:%M:%S"
+              }
+            },
+            "kwargs": {
+              "name": "parsed_datetime_output"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-import { NodeConfiguration } from '../types/nodeConfig';
+import { NodeConfiguration } from "../types/nodeConfig";
 
 // Simple event emitter for configuration changes
 type ConfigurationEventListener = () => void;
@@ -9,12 +9,12 @@ type ConfigurationEventListener = () => void;
 class NodeConfigService {
   private configurations: Map<string, NodeConfiguration> = new Map();
   private listeners: ConfigurationEventListener[] = [];
-  
+
   // Add event listener for configuration changes
   addListener(listener: ConfigurationEventListener): void {
     this.listeners.push(listener);
   }
-  
+
   // Remove event listener
   removeListener(listener: ConfigurationEventListener): void {
     const index = this.listeners.indexOf(listener);
@@ -22,12 +22,12 @@ class NodeConfigService {
       this.listeners.splice(index, 1);
     }
   }
-  
+
   // Notify all listeners of configuration changes
   private notifyListeners(): void {
-    this.listeners.forEach(listener => listener());
+    this.listeners.forEach((listener) => listener());
   }
-  
+
   // Load a configuration (in a real app, this might read from disk or API)
   loadConfiguration(config: NodeConfiguration): string {
     const id = this.generateConfigId(config.name);
@@ -35,71 +35,48 @@ class NodeConfigService {
     this.notifyListeners(); // Notify listeners of the change
     return id;
   }
-  
+
   // Get a configuration by ID
   getConfiguration(id: string): NodeConfiguration | undefined {
     return this.configurations.get(id);
   }
-  
+
   // Get all configurations
   getAllConfigurations(): Array<{ id: string; config: NodeConfiguration }> {
-    return Array.from(this.configurations.entries()).map(([id, config]) => ({ id, config }));
+    return Array.from(this.configurations.entries()).map(([id, config]) => ({
+      id,
+      config,
+    }));
   }
-  
+
   // Get configurations by category
-  getConfigurationsByCategory(category?: string): Array<{ id: string; config: NodeConfiguration }> {
-    return this.getAllConfigurations().filter(({ config }) => 
-      !category || config.category === category
+  getConfigurationsByCategory(
+    category?: string
+  ): Array<{ id: string; config: NodeConfiguration }> {
+    return this.getAllConfigurations().filter(
+      ({ config }) => !category || config.category === category
     );
   }
-  
-  // Remove a configuration
-  removeConfiguration(id: string): boolean {
-    const result = this.configurations.delete(id);
-    if (result) {
-      this.notifyListeners(); // Notify listeners of the change
-    }
-    return result;
-  }
-  
-  // Clear all configurations (useful for reloading)
-  clearAllConfigurations(): void {
-    this.configurations.clear();
-    this.notifyListeners(); // Notify listeners of the change
-  }
-  
+
   // Generate a unique ID for a configuration
   private generateConfigId(name: string): string {
-    const baseId = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const baseId = name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
     let id = baseId;
     let counter = 1;
-    
+
     while (this.configurations.has(id)) {
       id = `${baseId}-${counter}`;
       counter++;
     }
-    
+
     return id;
-  }
-  
-  // Load configurations from JSON array (useful for bulk loading)
-  loadConfigurationsFromArray(configs: NodeConfiguration[]): string[] {
-    const configIds = configs.map(config => {
-      const id = this.generateConfigId(config.name);
-      this.configurations.set(id, config);
-      return id;
-    });
-    this.notifyListeners(); // Single notification for bulk changes
-    return configIds;
-  }
-  
-  // Export all configurations as JSON
-  exportConfigurations(): NodeConfiguration[] {
-    return Array.from(this.configurations.values());
   }
 }
 
 // Create a singleton instance
 export const nodeConfigService = new NodeConfigService();
 
-export default nodeConfigService; 
+export default nodeConfigService;

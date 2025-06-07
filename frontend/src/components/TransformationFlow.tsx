@@ -31,10 +31,12 @@ import {
   generateGraphExportJSON,
   importGraphFromJSON,
 } from "../utils/exportUtils";
+import OperatorNode from "./nodes/Node";
 
 const nodeTypes = {
   customInput: InputNode,
   dynamic: DynamicNode,
+  normal: OperatorNode,
 };
 
 // Main wrapper component with ReactFlowProvider

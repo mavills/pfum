@@ -128,8 +128,3 @@ export const isValidConnection = (
   return true;
   // return areTypesCompatible(sourceType, targetType);
 };
-
-// Helper to get all available node configurations
-export const getAvailableNodeConfigurations = () => {
-  return nodeConfigService.getAllConfigurations();
-};
