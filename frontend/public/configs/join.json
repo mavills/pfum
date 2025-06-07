@@ -1,0 +1,55 @@
+{
+  "name": "Join",
+  "description": "Join two dataframes on given columns",
+  "category": "Data Transformation",
+  "inputs": [
+    {
+      "name": "Left DataFrame",
+      "type": "string",
+      "description": "The left dataframe to join",
+      "path": "operations.0.kwargs.result_col.on.kwargs.exprs.0.kwargs.name",
+      "required": true
+    },
+    {
+      "name": "Right DataFrame",
+      "type": "string",
+      "description": "The right dataframe to join",
+      "path": "operations.0.kwargs.result_col.on.kwargs.exprs.1.kwargs.name",
+      "required": true
+    }
+  ],
+  "outputs": [],
+  "operations": [
+    {
+      "operation": "with_columns",
+      "kwargs": {
+        "result_col": {
+          "expr": "alias",
+          "on": {
+            "expr": "concat_str",
+            "kwargs": {
+              "exprs": [
+                {
+                  "expr": "col",
+                  "kwargs": {
+                    "name": "first_string"
+                  }
+                },
+                {
+                  "expr": "col",
+                  "kwargs": {
+                    "name": "second_string"
+                  }
+                }
+              ],
+              "separator": "_"
+            }
+          },
+          "kwargs": {
+            "name": "concatenated_result"
+          }
+        }
+      }
+    }
+  ]
+}

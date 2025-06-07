@@ -28,6 +28,13 @@
       "name": "Employee Output",
       "category": "Entity",
       "description": "Output node for Employee entity with TechWolf API compatible fields"
+    },
+    {
+      "id": "join",
+      "file": "join.json",
+      "name": "Join",
+      "category": "Data Transformation",
+      "description": "Join two dataframes on given columns"
     }
   ]
 } 
