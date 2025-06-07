@@ -132,9 +132,6 @@ Rows can be grouped, adding labels to the groups.
   background-color: var(--color-warning-hover);
 }
 
-.node-row__divider hr {
-  color: #ff0000;
-  background-color: #ff0000;
-  border-color: #ff0000;
-  /* border: 1px solid var(--color-gray-300); */
+.node-row__divider {
+  color: var(--color-gray-300);
 }

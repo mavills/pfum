@@ -1,8 +1,6 @@
 "use client";
 
 import React from "react";
-import { Position } from "@xyflow/react";
-import StyledHandle from "../HandleStyles";
 import NodeRow from "./NodeRow";
 import { X } from "lucide-react";
 

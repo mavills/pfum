@@ -1,13 +1,12 @@
 "use client";
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode } from "react";
 
-type NodeTheme = 'input' | 'transformation' | 'output' | 'utility';
+type NodeTheme = "input" | "transformation" | "output" | "utility";
 
 type NodeWrapperProps = {
   children: ReactNode;
   title: string;
-  theme?: NodeTheme;
   headerColor?: string; // Legacy support
   width?: string;
 };
@@ -15,28 +14,22 @@ type NodeWrapperProps = {
 const NodeWrapper: React.FC<NodeWrapperProps> = ({
   children,
   title,
-  theme = 'utility',
   headerColor, // Legacy support
-  width = 'auto',
+  width = "auto",
 }) => {
   const headerStyle = headerColor ? { backgroundColor: headerColor } : {};
 
   return (
     <div className="node-content" style={{ width }}>
       {/* Header with theme or legacy color */}
-      <div 
-        className="node-header"
-        style={headerStyle}
-      >
+      <div className="node-header" style={headerStyle}>
         <span className="truncate">{title}</span>
       </div>
-      
+
       {/* Content area */}
-      <div className="node-body">
-        {children}
-      </div>
+      <div className="node-body">{children}</div>
     </div>
   );
 };
 
-export default NodeWrapper; 
+export default NodeWrapper;

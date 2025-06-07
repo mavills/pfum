@@ -10,7 +10,7 @@ interface InputNodeRowProps {
 const InputNodeRow: React.FC<InputNodeRowProps> = ({ className = "" }) => {
   return (
     <NodeRow className={`${className}`}>
-      <hr className="node-divider" />
+      <hr className="node-row__divider" />
     </NodeRow>
   );
 };

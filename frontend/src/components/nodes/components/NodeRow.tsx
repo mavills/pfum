@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { Position } from "@xyflow/react";
-import StyledHandle from "../HandleStyles";
+import { Handle, Position } from "@xyflow/react";
 
 interface NodeRowProps {
   children: React.ReactNode;
@@ -25,19 +24,19 @@ const NodeRow: React.FC<NodeRowProps> = ({
     <div className={`node-content-row-outer ${className}`}>
       <div className="node-content-row-inner">{children}</div>
       {inputHandleId && (
-        <StyledHandle
+        <Handle
           type="target"
           position={Position.Left}
           id={inputHandleId}
-          dataType={inputDataType}
+          data-type={inputDataType}
         />
       )}
       {outputHandleId && (
-        <StyledHandle
+        <Handle
           type="source"
           position={Position.Right}
           id={outputHandleId}
-          dataType={outputDataType}
+          data-type={outputDataType}
         />
       )}
     </div>

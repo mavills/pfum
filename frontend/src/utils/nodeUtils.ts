@@ -122,7 +122,9 @@ export const isValidConnection = (
   const targetType = getHandleDataType(targetNode, targetHandle, false);
 
   // Use the type compatibility check
-  return areTypesCompatible(sourceType, targetType);
+  // TODO: Remove this once we have a proper type compatibility check
+  return true;
+  // return areTypesCompatible(sourceType, targetType);
 };
 
 // Helper to get all available node configurations

@@ -90,10 +90,10 @@ const S3ExplorerPanel: React.FC<S3ExplorerPanelProps> = ({ onAddInputNode }) => 
   };
 
   return (
-    <div className="s3-explorer-panel bg-white shadow-lg rounded-md overflow-hidden border border-gray-200 w-72">
+    <div className="s3-explorer-panel">
       {/* Header */}
-      <div className="bg-gray-100 px-4 py-3 border-b border-gray-200">
-        <h3 className="text-lg font-medium text-gray-800">S3 Explorer</h3>
+      <div className="">
+        <h3 className="">S3 Explorer</h3>
         <p className="text-sm text-gray-600">Browse and select CSV files</p>
       </div>
       

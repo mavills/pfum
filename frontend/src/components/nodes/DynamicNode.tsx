@@ -104,6 +104,7 @@ const DynamicNode: React.FC<NodeProps> = ({ data, id }) => {
           ))}
         </NodeRowGroup>
       )}
+      <NodeDivider />
 
       {/* Outputs */}
       {config.outputs.length > 0 && (
