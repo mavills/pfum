@@ -3,7 +3,7 @@ export type CustomNode = any;
 export type CustomEdge = any;
 
 export enum NodeType {
-  INPUT = 'input',
+  INPUT = 'customInput',
   DYNAMIC = 'dynamic',
 }
 

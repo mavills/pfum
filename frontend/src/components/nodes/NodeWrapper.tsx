@@ -19,21 +19,13 @@ const NodeWrapper: React.FC<NodeWrapperProps> = ({
   headerColor, // Legacy support
   width = 'auto',
 }) => {
-  // Get theme class, with fallback to legacy headerColor
-  const getThemeClass = () => {
-    if (headerColor) {
-      return ''; // Use inline style for legacy support
-    }
-    return `theme-${theme}`;
-  };
-
   const headerStyle = headerColor ? { backgroundColor: headerColor } : {};
 
   return (
-    <div className="react-flow__node-content" style={{ width }}>
+    <div className="node-content" style={{ width }}>
       {/* Header with theme or legacy color */}
       <div 
-        className={`node-header ${getThemeClass()}`}
+        className="node-header"
         style={headerStyle}
       >
         <span className="truncate">{title}</span>

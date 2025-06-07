@@ -1,0 +1,140 @@
+.react-flow {
+  --xy-node-color-default: inherit;
+  --xy-node-border-default: 1px solid #6b7280;
+  --xy-node-background-color-default: #fff;
+  --xy-node-group-background-color-default: rgba(240, 240, 240, 0.25);
+  --xy-node-boxshadow-hover-default: 0 1px 4px 1px rgba(0, 0, 0, 0.08);
+  --xy-node-boxshadow-selected-default: 0 0 0 0.5px #1a192b;
+}
+.react-flow__node {
+  border-radius: var(--radius-md);
+  background-color: var(--color-gray-100);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid;
+  width: 400px;
+}
+
+.react-flow__node.selected {
+  /* border: 1px solid; */
+  outline: 1px solid var(--color-primary);
+  border: 1px solid var(--color-primary);
+}
+
+/* Root of node wrapper */
+.node-content {
+  width: auto;
+}
+
+/* Header of node wrapper */
+.node-header {
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-weight: 600;
+  /* color: white; */
+  color: white;
+  border-bottom: 1px solid #00000066;
+  background-color: #8b5cf6;
+
+  /* Set the radius of the top of the node to match the radius of the node itself*/
+  border-top-left-radius: 0.3rem;
+  border-top-right-radius: 0.3rem;
+}
+
+/* Body of node wrapper */
+/* .node-body { */
+/* } */
+
+/*
+Node bodies consist out of rows.
+Rows can be grouped, adding labels to the groups.
+*/
+
+/* Node Row Groups */
+.node-content-group {
+  /* TODO: Remove this, it's just for debugging */
+  /* border: 1px solid red; */
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.node-content-group-label {
+  /* border: 1px solid blue; */
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  padding: var(--spacing-xs) var(--spacing-md);
+  /* margin-bottom: var(--spacing-xs); */
+  color: var(--color-gray-700);
+}
+
+.node-content-group-children {
+  /* border: 1px solid green; */
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* Node Rows */
+.node-content-row-outer {
+  position: relative;
+  /* border: 1px solid red; */
+  padding: var(--spacing-xs) var(--spacing-md);
+  /* margin: var(--spacing-xs) 0; */
+}
+
+/* .node-content-row-inner {} */
+
+/* individual node input components */
+.node-row__input-outer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.node-row__form-input {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-md);
+  background-color: white;
+  color: var(--color-gray-900);
+  font-size: var(--font-size-sm);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-default {
+  background-color: var(--color-gray-500);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-xs);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.btn-default:hover {
+  background-color: var(--color-gray-700);
+}
+
+.btn-destructive {
+  background-color: var(--color-warning);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-xs);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.btn-destructive:hover {
+  background-color: var(--color-warning-hover);
+}
+
+.node-row__divider hr {
+  color: #ff0000;
+  background-color: #ff0000;
+  border-color: #ff0000;
+  /* border: 1px solid var(--color-gray-300); */
+}

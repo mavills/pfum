@@ -1,12 +1,12 @@
 "use client";
 
-import React from 'react';
-import { Position } from '@xyflow/react';
-import StyledHandle from '../HandleStyles';
+import React from "react";
+import { Position } from "@xyflow/react";
+import StyledHandle from "../HandleStyles";
+import NodeRow from "./NodeRow";
+import { X } from "lucide-react";
 
 interface InputNodeRowProps {
-  id: string;
-  index: number;
   label: string;
   onChange: (value: string) => void;
   onDelete: () => void;
@@ -16,45 +16,36 @@ interface InputNodeRowProps {
 }
 
 const InputNodeRow: React.FC<InputNodeRowProps> = ({
-  id,
-  index,
   label,
   onChange,
   onDelete,
   outputHandleId,
   outputDataType = "string",
-  className = '',
+  className = "",
 }) => {
   return (
-    <div className={`node-content-row relative ${className}`}>
-      <div className="flex items-center justify-between w-full">
-        {/* Delete button */}
+    <NodeRow
+      outputHandleId={outputHandleId}
+      outputDataType={outputDataType}
+      className={`${className}`}
+    >
+      <div className="node-row__input-outer">
         <button
           onClick={onDelete}
-          className="text-red-500 hover:text-red-700 text-xs mr-2 flex-shrink-0"
+          className="btn-destructive"
           title="Remove item"
         >
-          ✕
+          <X />
         </button>
-        
-        {/* Input field */}
-        <input 
+        <input
           type="text"
           value={label}
           onChange={(e) => onChange(e.target.value)}
-          className="form-input flex-grow p-1 text-sm"
+          className="node-row__form-input"
         />
       </div>
-      
-      {/* Output handle */}
-      <StyledHandle
-        type="source"
-        position={Position.Right}
-        id={outputHandleId}
-        dataType={outputDataType}
-      />
-    </div>
+    </NodeRow>
   );
 };
 
-export default InputNodeRow; 
+export default InputNodeRow;

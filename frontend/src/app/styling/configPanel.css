@@ -1,0 +1,492 @@
+@import "./globals.css";
+
+/* Root config panel style */
+.config-panel {
+  background-color: var(--default-menu-background);
+  height: 100vh;
+  /* TODO: check if we can do without fixed width */
+  width: 300px;
+  overflow-y: auto;
+  border-right: 1px solid var(--default-menu-border-color);
+}
+
+.config-panel-header {
+  background-color: #37373a;
+  border-bottom: 1px solid #464647;
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.config-panel-title {
+  color: #cccccc;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.config-panel-content {
+  padding: var(--spacing-sm);
+}
+
+/* Accordion Styling */
+.config-accordion {
+  /* No additional styles needed, inherits from children */
+}
+
+.config-accordion-item {
+  border: 1px solid #464647;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-sm);
+  background-color: #37373a;
+  overflow: hidden;
+}
+
+.config-accordion-trigger {
+  all: unset;
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background-color: #37373a;
+  color: #cccccc;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.config-accordion-trigger:hover {
+  background-color: #404041;
+}
+
+.config-accordion-trigger[data-state="open"] {
+  background-color: #404041;
+}
+
+.config-accordion-chevron {
+  margin-left: auto;
+  transition: transform 0.2s ease;
+  color: #999999;
+}
+
+.config-accordion-trigger[data-state="open"] .config-accordion-chevron {
+  transform: rotate(180deg);
+}
+
+.config-accordion-content {
+  overflow: hidden;
+  background-color: #2d2d30;
+}
+
+.config-accordion-content[data-state="open"] {
+  animation: accordionSlideDown 200ms ease-out;
+}
+
+.config-accordion-content[data-state="closed"] {
+  animation: accordionSlideUp 200ms ease-out;
+}
+
+.config-section-content {
+  padding: var(--spacing-md);
+  padding-top: var(--spacing-sm);
+}
+
+/* Action Buttons */
+.config-action-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: #404041;
+  border: 1px solid #5a5a5c;
+  border-radius: var(--radius-sm);
+  color: #cccccc;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-bottom: var(--spacing-xs);
+}
+
+.config-action-button:hover {
+  background-color: #4a4a4c;
+  border-color: #6a6a6c;
+}
+
+.config-action-button:active {
+  background-color: #383839;
+}
+
+/* Subsection Styling */
+.config-subsection {
+  margin-bottom: var(--spacing-lg);
+}
+
+.config-subsection-title {
+  color: #999999;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--spacing-sm);
+  padding-left: var(--spacing-xs);
+}
+
+.config-node-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Node Items */
+.config-node-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: #37373a;
+  border: 1px solid #464647;
+  border-radius: var(--radius-sm);
+  color: #cccccc;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  min-height: 28px;
+}
+
+.config-node-item:hover {
+  background-color: #404041;
+  border-color: #5a5a5c;
+  transform: translateY(-1px);
+}
+
+.config-node-item:active {
+  background-color: #383839;
+  transform: translateY(0);
+}
+
+.config-node-drag-handle {
+  color: #666666;
+  display: flex;
+  align-items: center;
+  cursor: grab;
+}
+
+.config-node-drag-handle:active {
+  cursor: grabbing;
+}
+
+.config-node-icon {
+  color: #999999;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.config-node-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.config-node-title {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: #cccccc;
+  line-height: 1.2;
+  margin-bottom: 1px;
+}
+
+.config-node-description {
+  font-size: 10px;
+  color: #999999;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Configuration Status Bar */
+.config-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: #37373a;
+  border: 1px solid #464647;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.config-status-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.config-status-text {
+  font-size: var(--font-size-xs);
+  color: #cccccc;
+}
+
+.config-refresh-button {
+  background: none;
+  border: 1px solid #464647;
+  border-radius: var(--radius-xs);
+  color: #999999;
+  padding: var(--spacing-xs);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  transition: all 0.15s ease;
+}
+
+.config-refresh-button:hover {
+  background-color: #404041;
+  color: #cccccc;
+  border-color: #5a5a5c;
+}
+
+.config-refresh-button:active {
+  background-color: #4a4a4c;
+}
+
+/* Node Count Indicator */
+.config-node-count {
+  font-size: 10px;
+  color: #666666;
+  font-weight: normal;
+  margin-left: var(--spacing-xs);
+}
+
+/* Enhanced Empty State */
+.config-empty-state {
+  text-align: center;
+  color: #666666;
+  font-size: var(--font-size-xs);
+  padding: var(--spacing-lg);
+  font-style: italic;
+  background-color: #37373a;
+  border: 1px dashed #464647;
+  border-radius: var(--radius-sm);
+  margin: var(--spacing-md) 0;
+}
+
+.config-empty-state small {
+  font-size: 10px;
+  color: #555555;
+  display: block;
+  margin-top: var(--spacing-xs);
+}
+
+/* Search Components */
+.config-search-container {
+  margin-bottom: var(--spacing-md);
+}
+
+.config-search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.config-search-icon {
+  position: absolute;
+  left: var(--spacing-sm);
+  color: #666666;
+  z-index: 1;
+}
+
+.config-search-input {
+  width: 100%;
+  padding: var(--spacing-xs) var(--spacing-md);
+  padding-left: 28px;
+  background-color: #37373a;
+  border: 1px solid #464647;
+  border-radius: var(--radius-sm);
+  color: #cccccc;
+  font-size: var(--font-size-xs);
+  transition: border-color 0.15s ease;
+}
+
+.config-search-input:focus {
+  outline: none;
+  border-color: #5a5a5c;
+  background-color: #404041;
+}
+
+.config-search-input::placeholder {
+  color: #666666;
+}
+
+.config-search-clear {
+  position: absolute;
+  right: var(--spacing-sm);
+  color: #666666;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s ease;
+}
+
+.config-search-clear:hover {
+  color: #999999;
+}
+
+/* Error & Loading States */
+.config-error {
+  background-color: #4a2f2f;
+  border: 1px solid #6b4545;
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.config-error p {
+  color: #ff9999;
+  font-size: var(--font-size-xs);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.config-error-dismiss {
+  background: none;
+  border: none;
+  color: #cc7777;
+  font-size: 10px;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
+.config-error-dismiss:hover {
+  color: #ff9999;
+}
+
+.config-loading {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  color: #999999;
+  font-size: var(--font-size-xs);
+  justify-content: center;
+}
+
+.config-loading-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #464647;
+  border-top-color: #999999;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* File List */
+.config-file-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.config-file-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  margin-bottom: 1px;
+}
+
+.config-file-item.csv {
+  color: #cccccc;
+}
+
+.config-file-item.csv:hover {
+  background-color: #404041;
+}
+
+.config-file-item.disabled {
+  color: #666666;
+  cursor: not-allowed;
+}
+
+.config-file-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.config-file-item.csv .config-file-icon {
+  color: #7db46c;
+}
+
+.config-file-item.disabled .config-file-icon {
+  color: #666666;
+}
+
+.config-file-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.config-file-name {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.config-file-meta {
+  display: flex;
+  gap: var(--spacing-sm);
+  font-size: 10px;
+  color: #666666;
+  margin-top: 1px;
+}
+
+.config-empty-state {
+  text-align: center;
+  color: #666666;
+  font-size: var(--font-size-xs);
+  padding: var(--spacing-lg);
+  font-style: italic;
+}
+
+/* Custom scrollbar for config panel */
+.config-panel::-webkit-scrollbar,
+.config-file-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.config-panel::-webkit-scrollbar-track,
+.config-file-list::-webkit-scrollbar-track {
+  background: #2d2d30;
+}
+
+.config-panel::-webkit-scrollbar-thumb,
+.config-file-list::-webkit-scrollbar-thumb {
+  background: #464647;
+  border-radius: 3px;
+}
+
+.config-panel::-webkit-scrollbar-thumb:hover,
+.config-file-list::-webkit-scrollbar-thumb:hover {
+  background: #5a5a5c;
+}

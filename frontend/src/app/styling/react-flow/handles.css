@@ -1,0 +1,19 @@
+.react-flow {
+  --xy-handle-background-color-default: #8ff;
+  --xy-handle-border-color-default: #000;
+}
+
+.react-flow__handle {
+  /* background-color: var(--xy-handle-background-color-default);
+  border-color: var(--xy-handle-border-color-default); */
+  border: 1px solid;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.react-flow__handle-left {
+}
+
+.react-flow__handle-right {
+}
