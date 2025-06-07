@@ -319,7 +319,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
                 <button 
                   className="config-action-button"
                   onClick={onExportConfig}
-                  style={{ opacity: 0.7, fontSize: '11px' }}
+                  style={{ opacity: 0.7, fontSize: '1px' }}
                 >
                   <Download size={12} />
                   <span>Export (Legacy)</span>
