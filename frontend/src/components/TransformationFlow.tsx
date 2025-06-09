@@ -22,14 +22,12 @@ import PreviewPanel from "./panels/PreviewPanel";
 import ExportConfigPanel from "./panels/ExportConfigPanel";
 
 // Types and utilities
-import {
-  generateGraphExportJSON,
-  importGraphFromJSON,
-} from "../utils/exportUtils";
+import { generateGraphExportJSON } from "../services/serialization/exportUtils";
 import OperatorNode from "./nodes/OperatorNode";
 import { initializeDefaultOperators } from "@/services/templating/loader";
 import nodePubSub from "@/services/nodes/pubsub";
 import manualInputOperator from "@/services/templating/manualInputOperator";
+import { importGraphFromJSON } from "@/services/serialization/importUtils";
 
 const nodeTypes = {
   custom_input: InputNode,
@@ -180,7 +178,7 @@ const FlowContent: React.FC = () => {
     } catch (error) {
       console.error("❌ [EXPORT] Failed to export graph:", error);
       // Fallback to old export panel
-      setIsExportOpen(true);
+      // setIsExportOpen(true);
     }
   }, [nodes, edges]);
 
