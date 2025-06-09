@@ -18,6 +18,8 @@ function createNodeExport(node: Node) {
   const operator = node.data as unknown as Operator;
   return {
     id: node.id,
+    type: node.type,
+    position: node.position,
     operator: operator,
   };
 

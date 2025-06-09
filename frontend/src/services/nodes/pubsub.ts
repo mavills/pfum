@@ -40,11 +40,12 @@ class NodePubSub {
 
   constructNodeFromOperator(
     operator: Operator,
-    position: { x: number; y: number }
+    position: { x: number; y: number },
+    id: string | undefined = undefined
   ): Node {
     const nodeType = operatorTypeToNodeType(operator);
     const node: Node = {
-      id: `operator_${currentId++}`,
+      id: id || `operator_${currentId++}`,
       position,
       type: nodeType,
       data: operator as unknown as Record<string, unknown>, // Type assertion for ReactFlow compatibility
