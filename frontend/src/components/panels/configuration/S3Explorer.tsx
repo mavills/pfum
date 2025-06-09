@@ -3,6 +3,7 @@ import * as Accordion from "@radix-ui/react-accordion";
 import { ChevronDown, FolderOpen, Search, X, Upload, GripVertical, Sparkles } from "lucide-react";
 import { formatFileSize, formatDate } from "./utils";
 import DraggableNode from "./DraggableNode";
+import manualInputOperator from "@/services/templating/manualInputOperator";
 
 export interface S3File {
   key: string;
@@ -125,71 +126,6 @@ const S3Explorer: React.FC<S3ExplorerProps> = ({ onAddInputNodeFromS3 }) => {
     }
   };
 
-  // Handle drag start for local file
-  const handleLocalFileDragStart = (fileInfo: LocalFileInfo) => (event: React.DragEvent) => {
-    console.log("🚀 [DRAG-START] Starting drag for local file:", fileInfo.name);
-
-    const nodeData = {
-      type: "localFile",
-      fileInfo: fileInfo,
-      title: fileInfo.name
-    };
-
-    console.log("📦 [DRAG-DATA] Local file data:", nodeData);
-
-    // Set the data in multiple formats to ensure compatibility
-    const dataString = JSON.stringify(nodeData);
-    event.dataTransfer.setData("application/reactflow", dataString);
-    event.dataTransfer.setData("text/plain", dataString);
-
-    // Set the effect to copy
-    event.dataTransfer.effectAllowed = "copy";
-
-    // Create a cleaner drag image
-    const dragImage = document.createElement("div");
-    dragImage.innerHTML = `📁 ${fileInfo.name}`;
-    dragImage.style.position = "absolute";
-    dragImage.style.top = "-1000px";
-    dragImage.style.left = "-1000px";
-    dragImage.style.background = "#4a5568";
-    dragImage.style.color = "white";
-    dragImage.style.padding = "6px 10px";
-    dragImage.style.borderRadius = "4px";
-    dragImage.style.fontSize = "12px";
-    dragImage.style.fontWeight = "500";
-    dragImage.style.pointerEvents = "none";
-    dragImage.style.zIndex = "-1";
-
-    document.body.appendChild(dragImage);
-
-    try {
-      event.dataTransfer.setDragImage(dragImage, 50, 15);
-      console.log("🖼️ [DRAG-IMAGE] Custom drag image set for local file");
-    } catch (error) {
-      console.warn("⚠️ [DRAG-IMAGE] Failed to set custom drag image:", error);
-    }
-
-    // Clean up the drag image after a short delay
-    setTimeout(() => {
-      if (document.body.contains(dragImage)) {
-        document.body.removeChild(dragImage);
-        console.log("🧹 [CLEANUP] Drag image removed");
-      }
-    }, 100);
-  };
-
-  // Handle local file button click (fallback for drag)
-  const handleLocalFileButtonClick = (fileInfo: LocalFileInfo) => () => {
-    // Click-to-add functionality for local files
-    // TODO: Implement click-to-add functionality for local files
-    console.log("📁 [LOCAL-FILE] Click to add local file:", fileInfo);
-  };
-
-  // Remove a specific local file
-  const removeLocalFile = (fileId: string) => {
-    setSelectedLocalFiles(prev => prev.filter(f => f.id !== fileId));
-  };
-
   // Clear all local files
   const clearAllLocalFiles = () => {
     setSelectedLocalFiles([]);
@@ -245,13 +181,7 @@ const S3Explorer: React.FC<S3ExplorerProps> = ({ onAddInputNodeFromS3 }) => {
                 {selectedLocalFiles.map((fileInfo) => (
                   <DraggableNode
                     key={fileInfo.id}
-                    type="dynamic"
-                    configId={fileInfo.id}
-                    title={fileInfo.name}
-                    description={fileInfo.type || 'Custom node configuration'}
-                    icon={<Sparkles size={14} />}
-                    onAddNode={() => {}}
-                    onAddDynamicNode={() => {}}
+                    operator={manualInputOperator}
                   />
                   // <div
                   //   key={fileInfo.id}
