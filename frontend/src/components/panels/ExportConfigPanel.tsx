@@ -3,26 +3,27 @@
 import React, { useState, useEffect } from "react";
 import { CustomNode, CustomEdge } from "../../types";
 import { generateGraphExportJSON } from "../../services/serialization/exportUtils";
+import { useReactFlow } from "@xyflow/react";
 
 interface ExportConfigPanelProps {
-  nodes: CustomNode[];
-  edges: CustomEdge[];
   isOpen: boolean;
   onClose: () => void;
 }
 
 const ExportConfigPanel: React.FC<ExportConfigPanelProps> = ({
-  nodes,
-  edges,
   isOpen,
   onClose,
 }) => {
   const [copied, setCopied] = useState(false);
   const [formattedJSON, setFormattedJSON] = useState<string>("");
+  const reactFlowInstance = useReactFlow();
 
   useEffect(() => {
     if (isOpen) {
-      const configJSON = generateGraphExportJSON(nodes, edges);
+      const configJSON = generateGraphExportJSON(
+        reactFlowInstance.getNodes(),
+        reactFlowInstance.getEdges()
+      );
       // Apply basic syntax highlighting
       const highlighted = configJSON
         .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
@@ -39,11 +40,14 @@ const ExportConfigPanel: React.FC<ExportConfigPanelProps> = ({
 
       setFormattedJSON(highlighted);
     }
-  }, [isOpen, nodes, edges]);
+  }, [isOpen, reactFlowInstance]);
 
   if (!isOpen) return null;
 
-  const rawConfigJSON = generateGraphExportJSON(nodes, edges);
+  const rawConfigJSON = generateGraphExportJSON(
+    reactFlowInstance.getNodes(),
+    reactFlowInstance.getEdges()
+  );
 
   const handleCopy = () => {
     navigator.clipboard.writeText(rawConfigJSON);

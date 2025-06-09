@@ -88,17 +88,13 @@ function createNodeExport(node: Node) {
 /**
  * Creates a clean edge export structure with source/target mapping
  */
-function createEdgeExport(edge: CustomEdge) {
+function createEdgeExport(edge: Edge) {
   return {
     id: edge.id,
-    source: {
-      node_id: edge.source,
-      output_handle: edge.sourceHandle,
-    },
-    target: {
-      node_id: edge.target,
-      input_handle: edge.targetHandle,
-    },
+    source_node_id: edge.source,
+    target_node_id: edge.target,
+    source_handle_id: edge.sourceHandle,
+    target_handle_id: edge.targetHandle,
   };
 }
 

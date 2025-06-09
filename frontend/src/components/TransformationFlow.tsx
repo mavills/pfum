@@ -330,8 +330,6 @@ const FlowContent: React.FC = () => {
           <ExportConfigPanel
             isOpen={isExportOpen}
             onClose={() => setIsExportOpen(false)}
-            nodes={nodes}
-            edges={edges}
           />
         )}
       </div>

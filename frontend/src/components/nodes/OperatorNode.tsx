@@ -1,4 +1,4 @@
-import { NodeProps, Node, useEdges, Edge, useReactFlow } from "@xyflow/react";
+import { NodeProps, useEdges, Edge, useReactFlow } from "@xyflow/react";
 import { Operator } from "../../services/templating/operatorType";
 import NodeWrapper from "./NodeWrapper";
 import NodeRowGroup from "./components/NodeRowGroup";
