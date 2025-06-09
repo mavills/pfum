@@ -1,8 +1,10 @@
 boto3
+dotenv
 fastapi
 httpx
 mangum
 pandas
+polars-as-config
 pydantic
 pydantic-settings
 pytest

@@ -1,4 +1,4 @@
-import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -15,6 +15,25 @@ load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
 configure_logging()
 logger = get_logger("main")
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Lifespan event handler.
+    """
+    logger.info(
+        "Application starting",
+        app_name=settings.APP_NAME,
+        version=settings.APP_VERSION,
+        environment=settings.ENVIRONMENT,
+    )
+    yield
+    logger.info(
+        "Application shutting down",
+        app_name=settings.APP_NAME,
+    )
+
+
 # Create FastAPI app
 app = FastAPI(
     title=settings.APP_NAME,
@@ -23,6 +42,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
+    lifespan=lifespan,
 )
 
 # CORS middleware
@@ -37,12 +57,13 @@ app.add_middleware(
 # Include API router with prefix
 app.include_router(api_router, prefix=f"{settings.API_PREFIX}{settings.API_V1_PREFIX}")
 
+
 # Add root route
 @app.get("/", tags=["root"])
 async def root():
     """
     Root endpoint returning basic API information.
-    
+
     Returns:
         dict: API information
     """
@@ -52,29 +73,3 @@ async def root():
         "environment": settings.ENVIRONMENT,
         "docs": "/docs",
     }
-
-
-# Startup event
-@app.on_event("startup")
-async def startup_event():
-    """
-    Actions to perform on application startup.
-    """
-    logger.info(
-        "Application starting",
-        app_name=settings.APP_NAME,
-        version=settings.APP_VERSION,
-        environment=settings.ENVIRONMENT,
-    )
-
-
-# Shutdown event
-@app.on_event("shutdown")
-async def shutdown_event():
-    """
-    Actions to perform on application shutdown.
-    """
-    logger.info(
-        "Application shutting down",
-        app_name=settings.APP_NAME,
-    ) 
