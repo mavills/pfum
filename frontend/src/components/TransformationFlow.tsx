@@ -17,15 +17,11 @@ import {
 
 // Components
 import InputNode from "./nodes/InputNode";
-import DynamicNode from "./nodes/DynamicNode";
 import ConfigurationPanel from "./panels/configuration/ConfigurationPanel";
 import PreviewPanel from "./panels/PreviewPanel";
 import ExportConfigPanel from "./panels/ExportConfigPanel";
 
 // Types and utilities
-import { NodeType, InputNodeData } from "../types";
-import { createDynamicNode, createNode } from "../utils/nodeUtils";
-import { loadConfigurationsFromPublicDirectory } from "../utils/configLoader";
 import {
   generateGraphExportJSON,
   importGraphFromJSON,
@@ -33,10 +29,10 @@ import {
 import OperatorNode from "./nodes/OperatorNode";
 import { initializeDefaultOperators } from "@/services/templating/loader";
 import nodePubSub from "@/services/nodes/pubsub";
+import manualInputOperator from "@/services/templating/manualInputOperator";
 
 const nodeTypes = {
-  customInput: InputNode,
-  dynamic: DynamicNode,
+  custom_input: InputNode,
   normal: OperatorNode,
 };
 
@@ -55,11 +51,6 @@ const FlowContent: React.FC = () => {
   useEffect(() => {
     const loadConfigurations = async () => {
       await initializeDefaultOperators();
-      // try {
-      //   const configIds = await loadConfigurationsFromPublicDirectory();
-      // } catch (error) {
-      //   console.error("Failed to load configurations:", error);
-      // }
     };
 
     loadConfigurations();
@@ -142,12 +133,7 @@ const FlowContent: React.FC = () => {
         });
 
         // Add the node based on its type
-        if (nodeData.type === "basic" && nodeData.nodeType) {
-          onAddNode(nodeData.nodeType, position);
-        } else if (nodeData.type === "dynamic" && nodeData.configId) {
-          onAddDynamicNode(nodeData.configId, position);
-        } else {
-        }
+        nodePubSub.addNodeFromOperator(nodeData, position);
       } catch (error) {
         console.error("Error handling drop:", {
           error: error instanceof Error ? error.message : String(error),
@@ -155,29 +141,6 @@ const FlowContent: React.FC = () => {
       }
     },
     [screenToFlowPosition]
-  );
-
-  // Add a new node from drag and drop
-  const onAddNode = useCallback(
-    (type: NodeType, position: { x: number; y: number }) => {
-      const newNode = createNode(type, position);
-      setNodes((nds) => [...nds, newNode]);
-    },
-    [setNodes]
-  );
-
-  // Add a dynamic node
-  const onAddDynamicNode = useCallback(
-    (configId: string, position: { x: number; y: number }) => {
-      try {
-        const newNode = createDynamicNode(configId, position);
-        console.log("new node", newNode);
-        setNodes((nds) => [...nds, newNode]);
-      } catch (error) {
-        console.error("Failed to create dynamic node:", error);
-      }
-    },
-    [setNodes]
   );
 
   // Add input node from S3 file
@@ -195,17 +158,10 @@ const FlowContent: React.FC = () => {
       }
 
       // Create the input node with column names
-      const newNode = createNode(NodeType.INPUT, position);
-
-      // Update the node data with column names and source file
-      const nodeData = newNode.data as unknown as InputNodeData;
-      nodeData.column_names = columnNames;
-      nodeData.source_file = sourceFile;
-
-      // Add the new node to the flow
-      setNodes((nds) => [...nds, newNode]);
+      // TODO: add pre-filled column names and source file
+      nodePubSub.addNodeFromOperator(manualInputOperator, position);
     },
-    [nodes, setNodes]
+    [nodes]
   );
 
   // Export graph to new tab
@@ -297,8 +253,6 @@ const FlowContent: React.FC = () => {
     <>
       {/* Configuration Sidebar */}
       <ConfigurationPanel
-        onAddNode={onAddNode}
-        onAddDynamicNode={onAddDynamicNode}
         onAddInputNodeFromS3={onAddInputNodeFromS3}
         onPreviewTransformation={() => setIsPreviewOpen(true)}
         onExportConfig={() => setIsExportOpen(true)}

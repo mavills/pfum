@@ -52,7 +52,7 @@ function createNodeExport(node: CustomNode) {
       };
     }
     
-    case NodeType.DYNAMIC: {
+    case NodeType.NORMAL: {
       const dynamicData = node.data as DynamicNodeData;
       return {
         ...baseNode,
@@ -262,7 +262,7 @@ export function importGraphFromJSON(jsonString: string): {
           
           return {
             ...baseNode,
-            type: NodeType.DYNAMIC,
+            type: NodeType.NORMAL,
             data: {
               type: 'dynamic',
               nodeConfigId: instanceData.nodeConfigId,

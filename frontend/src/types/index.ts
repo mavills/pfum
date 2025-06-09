@@ -3,8 +3,8 @@ export type CustomNode = any;
 export type CustomEdge = any;
 
 export enum NodeType {
-  INPUT = 'customInput',
-  DYNAMIC = 'dynamic',
+  INPUT = 'custom_input',
+  NORMAL = 'normal',
 }
 
 export interface BaseNodeData {

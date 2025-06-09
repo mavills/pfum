@@ -3,16 +3,11 @@
 import React from "react";
 import * as Accordion from "@radix-ui/react-accordion";
 import GeneralActionsSection from "./GeneralActionsSection";
-import DynamicNodesSection from "./DynamicNodesSection";
+import AddNodeMenu from "./AddNodeMenu";
 import S3Explorer from "./S3Explorer";
 import { NodeType } from "../../../types";
 
 export interface ConfigurationPanelProps {
-  onAddNode: (type: NodeType, position: { x: number; y: number }) => void;
-  onAddDynamicNode: (
-    configId: string,
-    position: { x: number; y: number }
-  ) => void;
   onAddInputNodeFromS3: (columnNames: string[], sourceFile: string) => void;
   onPreviewTransformation: () => void;
   onExportConfig: () => void;
@@ -23,8 +18,6 @@ export interface ConfigurationPanelProps {
 }
 
 const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
-  onAddNode,
-  onAddDynamicNode,
   onAddInputNodeFromS3,
   onPreviewTransformation,
   onExportConfig,
@@ -56,10 +49,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
           />
 
           {/* Add Nodes */}
-          <DynamicNodesSection
-            onAddNode={onAddNode}
-            onAddDynamicNode={onAddDynamicNode}
-          />
+          <AddNodeMenu />
 
           {/* File Settings (S3 Explorer) */}
           {isS3ExplorerOpen && (

@@ -1,10 +1,18 @@
 import { Node } from "@xyflow/react";
-import operatorPubSub from "../templating/pubsub";
+import { Operator } from "../templating/operatorType";
+import { NodeType } from "@/types";
 
 // Simple event emitter for configuration changes
 type NodeCreateEventListener = (node: Node) => void;
 
 let currentId = 0;
+
+const operatorTypeToNodeType = (operator: Operator): NodeType => {
+  if (operator.type === "manual-input") {
+    return NodeType.INPUT;
+  }
+  return NodeType.NORMAL;
+};
 
 class NodePubSub {
   private listeners: NodeCreateEventListener[] = [];
@@ -30,22 +38,26 @@ class NodePubSub {
     this.listeners.forEach((listener) => listener(node));
   }
 
-  createNodeFromTemplate(
-    operatorId: string,
+  constructNodeFromOperator(
+    operator: Operator,
     position: { x: number; y: number }
-  ): void {
-    const operator = operatorPubSub.getOperator(operatorId);
-    if (!operator) {
-      throw new Error(`Operator not found: ${operatorId}`);
-    }
-
+  ): Node {
+    const nodeType = operatorTypeToNodeType(operator);
     const node: Node = {
       id: `operator_${currentId++}`,
       position,
-      type: "normal",
+      type: nodeType,
       data: operator as unknown as Record<string, unknown>, // Type assertion for ReactFlow compatibility
     };
 
+    return node;
+  }
+
+  addNodeFromOperator(
+    operator: Operator,
+    position: { x: number; y: number }
+  ): void {
+    const node = this.constructNodeFromOperator(operator, position);
     this.notifyListeners(node);
   }
 }

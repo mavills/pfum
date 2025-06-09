@@ -18,6 +18,7 @@ const OperatorNode: React.FC<NodeProps> = (props: NodeProps) => {
   );
 
   const handleInputChange = useCallback((inputId: string, value: any) => {
+    nodeData.inputs.find((input) => input.id === inputId)!.value = value;
     setInputValues((prev) => ({ ...prev, [inputId]: value }));
   }, []);
 

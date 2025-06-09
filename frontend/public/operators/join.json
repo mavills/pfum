@@ -1,6 +1,6 @@
 {
   "title": "Join",
-  "icon": "merge",
+  "icon": "table",
   "description": "Join two dataframes on given columns",
   "id": "join",
   "type": "join",

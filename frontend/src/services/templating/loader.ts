@@ -22,7 +22,7 @@ async function listOperators(): Promise<string[]> {
   return operatorLocations;
 }
 
-async function loadOperator(configLocation: string): Promise<Operator> {
+async function loadRemoteOperator(configLocation: string): Promise<Operator> {
   const configResponse = await fetch(configLocation);
   if (!configResponse.ok) {
     throw new Error(`Failed to load config: ${configResponse.status}`);
@@ -30,41 +30,13 @@ async function loadOperator(configLocation: string): Promise<Operator> {
   return configResponse.json();
 }
 
-export async function getAllOperators(): Promise<Operator[]> {
+export async function getAllDefaultRemoteOperators(): Promise<Operator[]> {
   const operatorLocations = await listOperators();
-  const operators = await Promise.all(operatorLocations.map(loadOperator));
+  const operators = await Promise.all(operatorLocations.map(loadRemoteOperator));
   return operators;
 }
 
 export async function initializeDefaultOperators(): Promise<void> {
-  const operators = await getAllOperators();
+  const operators = await getAllDefaultRemoteOperators();
   operatorPubSub.loadConfigurations(operators);
 }
-
-// Example function to load from a JSON file (client-side)
-// export async function loadConfigurationFromFile(file: File): Promise<string> {
-//   return new Promise((resolve, reject) => {
-//     const reader = new FileReader();
-
-//     reader.onload = (event) => {
-//       try {
-//         const jsonString = event.target?.result as string;
-//         const config: NodeConfiguration = JSON.parse(jsonString);
-
-//         // Validate the configuration
-//         if (!isValidNodeConfiguration(config)) {
-//           reject(new Error('Invalid node configuration format'));
-//           return;
-//         }
-
-//         const configId = nodeConfigService.loadConfiguration(config);
-//         resolve(configId);
-//       } catch (error) {
-//         reject(new Error(`Failed to parse configuration: ${error}`));
-//       }
-//     };
-
-//     reader.onerror = () => reject(new Error('Failed to read file'));
-//     reader.readAsText(file);
-//   });
-// }
