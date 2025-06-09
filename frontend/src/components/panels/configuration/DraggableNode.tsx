@@ -1,9 +1,10 @@
 import React from "react";
 import { GripVertical } from "lucide-react";
 import { NodeType } from "../../../types";
+import nodePubSub from "@/services/nodes/pubsub";
 
 interface DraggableNodeProps {
-  type: "basic" | "dynamic";
+  type: "basic" | "dynamic" | "normal";
   nodeType?: NodeType;
   configId?: string;
   title: string;
@@ -50,6 +51,17 @@ const DraggableNode: React.FC<DraggableNodeProps> = ({
       onAddNode(nodeType, defaultPosition);
     } else if (type === "dynamic" && configId) {
       onAddDynamicNode(configId, defaultPosition);
+    } else if (type === "normal" && configId) {
+      nodePubSub.createNodeFromTemplate(configId, defaultPosition);
+    } else {
+      console.log(
+        "🔄 [DRAGGABLE-NODE] No type or configId provided, type:",
+        type,
+        "nodeType:",
+        nodeType,
+        "configId:",
+        configId
+      );
     }
   };
 

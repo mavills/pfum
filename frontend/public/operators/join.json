@@ -1,0 +1,72 @@
+{
+  "title": "Join",
+  "icon": "merge",
+  "description": "Join two dataframes on given columns",
+  "id": "join",
+  "type": "join",
+  "groups": [
+    "inputs",
+    "outputs"
+  ],
+  "category": "table",
+  "inputs": [
+    {
+      "id": "left-dataframe",
+      "type": "string",
+      "name": "left key",
+      "description": "The left key to join on",
+      "validation": {},
+      "group": "inputs",
+      "default": "",
+      "editable": false,
+      "required": true
+    },
+    {
+      "id": "right-dataframe",
+      "type": "string",
+      "name": "right key",
+      "description": "The right key to join on",
+      "validation": {},
+      "group": "inputs",
+      "default": "",
+      "editable": false,
+      "required": true
+    }
+  ],
+  "outputs": [],
+  "config": {
+    "steps": [
+      {
+        "operation": "with_columns",
+        "kwargs": {
+          "result_col": {
+            "expr": "alias",
+            "on": {
+              "expr": "concat_str",
+              "kwargs": {
+                "exprs": [
+                  {
+                    "expr": "col",
+                    "kwargs": {
+                      "name": "first_string"
+                    }
+                  },
+                  {
+                    "expr": "col",
+                    "kwargs": {
+                      "name": "second_string"
+                    }
+                  }
+                ],
+                "separator": "_"
+              }
+            },
+            "kwargs": {
+              "name": "concatenated_result"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

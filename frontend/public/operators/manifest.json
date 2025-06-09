@@ -3,6 +3,18 @@
   "operators": [
     {
       "file": "string-to-datetime.json"
+    },
+    {
+      "file": "string-concatenation.json"
+    },
+    {
+      "file": "employee-output.json"
+    },
+    {
+      "file": "math-addition.json"
+    },
+    {
+      "file": "join.json"
     }
   ]
 }

@@ -1,0 +1,92 @@
+{
+  "title": "String Concatenation",
+  "icon": "string",
+  "description": "Concatenate two strings with a separator",
+  "id": "string-concatenation",
+  "type": "string-concatenation",
+  "groups": [
+    "inputs",
+    "outputs"
+  ],
+  "category": "string",
+  "inputs": [
+    {
+      "id": "first-string",
+      "type": "string",
+      "name": "a",
+      "description": "The first string to concatenate",
+      "validation": {},
+      "group": "inputs",
+      "default": "",
+      "editable": true,
+      "required": true
+    },
+    {
+      "id": "second-string",
+      "type": "string",
+      "name": "b",
+      "description": "The second string to concatenate",
+      "validation": {},
+      "group": "inputs",
+      "default": "",
+      "editable": true,
+      "required": true
+    },
+    {
+      "id": "separator",
+      "type": "string",
+      "name": "Separator",
+      "description": "Separator between strings",
+      "validation": {},
+      "group": "inputs",
+      "default": "_",
+      "editable": true,
+      "required": true
+    }
+  ],
+  "outputs": [
+    {
+      "id": "concatenated-string",
+      "type": "string",
+      "name": "Concatenated String",
+      "description": "The result of concatenation",
+      "group": "outputs",
+      "editable": false
+    }
+  ],
+  "config": {
+    "steps": [
+      {
+        "operation": "with_columns",
+        "kwargs": {
+          "result_col": {
+            "expr": "alias",
+            "on": {
+              "expr": "concat_str",
+              "kwargs": {
+                "exprs": [
+                  {
+                    "expr": "col",
+                    "kwargs": {
+                      "name": "first_string"
+                    }
+                  },
+                  {
+                    "expr": "col",
+                    "kwargs": {
+                      "name": "second_string"
+                    }
+                  }
+                ],
+                "separator": "_"
+              }
+            },
+            "kwargs": {
+              "name": "concatenated_result"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

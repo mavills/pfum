@@ -37,12 +37,14 @@ class OperatorPubSub {
   }
 
   // Get a configuration by ID
-  getConfiguration(id: string): Operator | undefined {
+  getOperator(id: string): Operator | undefined {
     return this.operators.get(id);
   }
 
   // Get all configurations
   getAllConfigurations(): Array<{ id: string; operator: Operator }> {
+    console.log("🔄 [OPERATOR-PUB-SUB] Getting all configurations");
+    console.log(this.operators);
     return Array.from(this.operators.entries()).map(([id, operator]) => ({
       id,
       operator,

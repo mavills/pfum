@@ -38,6 +38,7 @@ class NodeConfigService {
 
   // Get a configuration by ID
   getConfiguration(id: string): NodeConfiguration | undefined {
+    console.log("🔄 [NODE-CONFIG-SERVICE] Getting configuration:", this.configurations);
     return this.configurations.get(id);
   }
 

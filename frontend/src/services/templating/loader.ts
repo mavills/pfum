@@ -1,4 +1,5 @@
 import { Operator } from "./operatorType";
+import { operatorPubSub } from "./pubsub";
 
 /**
  * Fetches and returns the list of configuration file paths from the manifest
@@ -33,6 +34,11 @@ export async function getAllOperators(): Promise<Operator[]> {
   const operatorLocations = await listOperators();
   const operators = await Promise.all(operatorLocations.map(loadOperator));
   return operators;
+}
+
+export async function initializeDefaultOperators(): Promise<void> {
+  const operators = await getAllOperators();
+  operatorPubSub.loadConfigurations(operators);
 }
 
 // Example function to load from a JSON file (client-side)

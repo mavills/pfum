@@ -1,0 +1,78 @@
+{
+  "title": "Math Addition",
+  "icon": "math",
+  "description": "Add two numbers together",
+  "id": "math-addition",
+  "type": "math-addition",
+  "groups": [
+    "inputs",
+    "outputs"
+  ],
+  "category": "math",
+  "inputs": [
+    {
+      "id": "first-number",
+      "type": "number",
+      "name": "First Number",
+      "description": "The first number to add",
+      "validation": {},
+      "group": "inputs",
+      "default": 0,
+      "editable": true,
+      "required": true
+    },
+    {
+      "id": "second-number",
+      "type": "number",
+      "name": "Second Number",
+      "description": "The second number to add",
+      "validation": {},
+      "group": "inputs",
+      "default": 0,
+      "editable": true,
+      "required": true
+    }
+  ],
+  "outputs": [
+    {
+      "id": "sum",
+      "type": "number",
+      "name": "Sum",
+      "description": "The sum of the two numbers",
+      "group": "outputs",
+      "editable": false
+    }
+  ],
+  "config": {
+    "steps": [
+      {
+        "operation": "with_columns",
+        "kwargs": {
+          "result_col": {
+            "expr": "alias",
+            "on": {
+              "expr": "add",
+              "kwargs": {
+                "left": {
+                  "expr": "col",
+                  "kwargs": {
+                    "name": "first_number"
+                  }
+                },
+                "right": {
+                  "expr": "col",
+                  "kwargs": {
+                    "name": "second_number"
+                  }
+                }
+              }
+            },
+            "kwargs": {
+              "name": "sum_result"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

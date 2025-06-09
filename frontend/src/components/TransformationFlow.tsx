@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   ReactFlowProvider,
   ReactFlow,
   Background,
   Controls,
-  Panel,
   useNodesState,
   useEdgesState,
   useReactFlow,
@@ -25,13 +24,15 @@ import ExportConfigPanel from "./panels/ExportConfigPanel";
 
 // Types and utilities
 import { NodeType, InputNodeData } from "../types";
-import { createNode, createDynamicNode } from "../utils/nodeUtils";
+import { createDynamicNode, createNode } from "../utils/nodeUtils";
 import { loadConfigurationsFromPublicDirectory } from "../utils/configLoader";
 import {
   generateGraphExportJSON,
   importGraphFromJSON,
 } from "../utils/exportUtils";
-import OperatorNode from "./nodes/Node";
+import OperatorNode from "./nodes/OperatorNode";
+import { initializeDefaultOperators } from "@/services/templating/loader";
+import nodePubSub from "@/services/nodes/pubsub";
 
 const nodeTypes = {
   customInput: InputNode,
@@ -53,15 +54,17 @@ const FlowContent: React.FC = () => {
   // Initialize configurations from files on first render
   useEffect(() => {
     const loadConfigurations = async () => {
-      try {
-        const configIds = await loadConfigurationsFromPublicDirectory();
-      } catch (error) {
-        console.error("Failed to load configurations:", error);
-      }
+      await initializeDefaultOperators();
+      // try {
+      //   const configIds = await loadConfigurationsFromPublicDirectory();
+      // } catch (error) {
+      //   console.error("Failed to load configurations:", error);
+      // }
     };
 
     loadConfigurations();
   }, []);
+
   // State for nodes and edges
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -74,6 +77,18 @@ const FlowContent: React.FC = () => {
 
   // ReactFlow hooks
   const { screenToFlowPosition } = useReactFlow();
+
+  // Listen for node creation events
+  useEffect(() => {
+    const handleNodeCreate = (node: Node) => {
+      setNodes((nds) => [...nds, node]);
+    };
+    nodePubSub.addCreateListener(handleNodeCreate);
+
+    return () => {
+      nodePubSub.removeListener(handleNodeCreate);
+    };
+  }, []);
 
   // Handle connections between nodes
   const onConnect = useCallback(
@@ -156,6 +171,7 @@ const FlowContent: React.FC = () => {
     (configId: string, position: { x: number; y: number }) => {
       try {
         const newNode = createDynamicNode(configId, position);
+        console.log("new node", newNode);
         setNodes((nds) => [...nds, newNode]);
       } catch (error) {
         console.error("Failed to create dynamic node:", error);

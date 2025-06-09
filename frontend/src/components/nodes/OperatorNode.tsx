@@ -5,10 +5,8 @@ import NodeRowGroup from "./components/NodeRowGroup";
 import { NodeDivider, NodeOutputRow, NodeTextInput } from "./components";
 import { useCallback, useState } from "react";
 
-export type OperatorNode = Node<{ operator: Operator }, "operator">;
-
-export default function OperatorNode(props: NodeProps<OperatorNode>) {
-  const nodeData = props.data.operator;
+const OperatorNode: React.FC<NodeProps> = (props: NodeProps) => {
+  const nodeData = props.data as unknown as Operator;
   const nodeEdges: Edge[] = useEdges();
   const nodeId = props.id;
 
@@ -77,4 +75,5 @@ export default function OperatorNode(props: NodeProps<OperatorNode>) {
       )}
     </NodeWrapper>
   );
-}
+};
+export default OperatorNode;
