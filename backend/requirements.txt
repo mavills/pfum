@@ -1,9 +1,8 @@
-boto3
-dotenv
 fastapi
 httpx
 mangum
 pandas
+polars
 polars-as-config
 pydantic
 pydantic-settings
@@ -11,5 +10,6 @@ pytest
 pytest-asyncio 
 python-dotenv
 python-json-logger
+python-multipart
 structlog
 uvicorn

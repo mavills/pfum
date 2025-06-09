@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import * as Accordion from "@radix-ui/react-accordion";
 import { ChevronDown, Sparkles, RefreshCw } from "lucide-react";
-import { nodeConfigService } from "../../../services/nodeConfigService";
 import DraggableNode from "./DraggableNode";
 import { operatorPubSub } from "@/services/templating/pubsub";
 import manualInputOperator from "@/services/templating/manualInputOperator";
@@ -31,11 +30,11 @@ const AddNodeMenu: React.FC<AddNodeMenuProps> = ({}) => {
       refreshConfigurations();
     };
 
-    nodeConfigService.addListener(handleConfigurationChange);
+    operatorPubSub.addListener(handleConfigurationChange);
 
     // Cleanup listener on unmount
     return () => {
-      nodeConfigService.removeListener(handleConfigurationChange);
+      operatorPubSub.removeListener(handleConfigurationChange);
     };
   }, [refreshConfigurations]);
 

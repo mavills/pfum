@@ -423,3 +423,77 @@
 .config-file-list::-webkit-scrollbar-thumb:hover {
   background: #5a5a5c;
 }
+
+/* File Upload UI Components */
+.config-file-upload-item {
+  background-color: #37373a;
+  border: 1px solid #464647;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-sm);
+  overflow: hidden;
+}
+
+.config-file-upload-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: #404041;
+  border-bottom: 1px solid #464647;
+}
+
+.config-file-upload-name {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: #cccccc;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.config-file-upload-size {
+  font-size: 10px;
+  color: #999999;
+  font-weight: normal;
+}
+
+.config-file-upload-remove {
+  background: none;
+  border: none;
+  color: #999999;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: var(--radius-xs);
+  transition: all 0.15s ease;
+}
+
+.config-file-upload-remove:hover {
+  background-color: #4a4a4c;
+  color: #cccccc;
+}
+
+.config-file-upload-error {
+  padding: var(--spacing-sm);
+  background-color: #4a2f2f;
+  border-top: 1px solid #6b4545;
+}
+
+.config-file-upload-error p {
+  color: #ff9999;
+  font-size: var(--font-size-xs);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.config-file-upload-success {
+  padding: var(--spacing-sm);
+}
+
+.config-file-upload-columns {
+  font-size: 10px;
+  color: #999999;
+  margin-bottom: var(--spacing-sm);
+  padding: var(--spacing-xs);
+  background-color: #2d2d30;
+  border-radius: var(--radius-xs);
+  border: 1px solid #464647;
+}
