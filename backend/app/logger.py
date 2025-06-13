@@ -1,7 +1,7 @@
 import logging
 import sys
 import os
-from typing import List, Dict, Any
+from typing import Any
 
 import structlog
 from structlog.stdlib import ProcessorFormatter
@@ -30,7 +30,7 @@ def configure_logging() -> None:
     logging.getLogger("uvicorn.error").handlers = []
     
     # Define processors for structlog
-    shared_processors: List[Any] = [
+    shared_processors: list[Any] = [
         structlog.contextvars.merge_contextvars,
         structlog.stdlib.add_logger_name,
         structlog.stdlib.add_log_level,

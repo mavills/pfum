@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { CustomNode, CustomEdge } from "../../types";
 import { generateGraphExportJSON } from "../../services/serialization/exportUtils";
 import { useReactFlow } from "@xyflow/react";
 

@@ -4,7 +4,7 @@ from mangum import Mangum
 
 # Import the FastAPI application
 from app.main import app
-from app.core.logger import get_logger
+from app.logger import get_logger
 
 # Set up logger
 logger = get_logger("lambda_handler")

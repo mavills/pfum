@@ -1,20 +1,29 @@
-import { NodeProps, useEdges, Edge, useReactFlow } from "@xyflow/react";
+import {
+  NodeProps,
+  useEdges,
+  Edge,
+  useReactFlow,
+  Connection,
+} from "@xyflow/react";
 import { Operator } from "../../services/templating/operatorType";
 import NodeWrapper from "./NodeWrapper";
 import NodeRowGroup from "./components/NodeRowGroup";
 import { NodeDivider, NodeOutputRow, NodeTextInput } from "./components";
 import { useCallback } from "react";
+import { generateGraphExport } from "@/services/serialization/exportUtils";
+import { operatorApi } from "@/services/templating/operatorApi";
 
 const OperatorNode: React.FC<NodeProps> = (props: NodeProps) => {
   const nodeEdges: Edge[] = useEdges();
   const nodeId = props.id;
-  const { setNodes } = useReactFlow();
+  const reactFlowInstance = useReactFlow();
   const operator = props.data as unknown as Operator;
 
   const handleInputChange = useCallback(
     (inputId: string, value: any) => {
-      setNodes((nodes) =>
+      reactFlowInstance.setNodes((nodes) =>
         nodes.map((node) => {
+          // Update the value of the input in the operator when a connection is made
           if (node.id === nodeId) {
             const updatedOperator = {
               ...operator,
@@ -31,11 +40,32 @@ const OperatorNode: React.FC<NodeProps> = (props: NodeProps) => {
         })
       );
     },
-    [nodeId, operator, setNodes]
+    [nodeId, operator, reactFlowInstance.setNodes]
   );
 
+  const handleConnectionChange = async (connection: Connection) => {
+    // Update the value of the input in the operator when a connection is made
+    // This is done through calling the API, and asking for an update on the data.
+    const graphExport = generateGraphExport(
+      reactFlowInstance.getNodes(),
+      reactFlowInstance.getEdges()
+    );
+    const updatedOperator = await operatorApi.updateNode(nodeId, graphExport);
+    reactFlowInstance.setNodes((nodes) =>
+      nodes.map((node) => {
+        if (node.id === nodeId) {
+          return { ...node, data: updatedOperator };
+        }
+        return node;
+      })
+    );
+  };
+
   return (
-    <NodeWrapper title={operator.title}>
+    <NodeWrapper
+      title={operator.title}
+      onConnectionChange={handleConnectionChange}
+    >
       {/* Inputs */}
       {operator.inputs.length > 0 && (
         <NodeRowGroup label="Inputs:">

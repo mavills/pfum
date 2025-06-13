@@ -1,4 +1,4 @@
-from app.api.schemas.transform import Node
+from app.api.schemas.transform import GraphNode
 
 #################################################################
 # 1. Figure out all the nodes linked to the node to be evaluated.
@@ -6,8 +6,8 @@ from app.api.schemas.transform import Node
 
 
 def select_subtree(
-    evaluate_node: Node, nodes: dict[str, Node], subtree: dict[str, Node] = {}
-) -> dict[str, Node]:
+    evaluate_node: GraphNode, nodes: dict[str, GraphNode], subtree: dict[str, GraphNode] = {}
+) -> dict[str, GraphNode]:
     """
     Find all nodes that are parents of the given node and the given node itself.
 
@@ -48,13 +48,13 @@ def select_subtree(
 # The end result is a list of nodes to execute in order.
 
 
-def topological_sort(nodes: dict[str, Node]) -> list[Node]:
+def topological_sort(nodes: dict[str, GraphNode]) -> list[GraphNode]:
     """
     Topologically sort the given nodes.
     """
     input_nodes = nodes.copy()
-    sorted_nodes: list[Node] = []
-    queue: list[Node] = []
+    sorted_nodes: list[GraphNode] = []
+    queue: list[GraphNode] = []
     # Add degree to each node
     for node in input_nodes.values():
         node.degree = len(node.inputs)
@@ -94,14 +94,14 @@ def topological_sort(nodes: dict[str, Node]) -> list[Node]:
 #################################################################
 
 
-def map_node_id_to_node(nodes: list[Node]) -> dict[str, Node]:
+def map_node_id_to_node(nodes: list[GraphNode]) -> dict[str, GraphNode]:
     """
     Map a list of nodes to a dictionary of node id to node.
     """
     return {node.id: node for node in nodes}
 
 
-def get_parents(node: Node, nodes: dict[str, Node]) -> dict[str, Node]:
+def get_parents(node: GraphNode, nodes: dict[str, GraphNode]) -> dict[str, GraphNode]:
     """
     Get all parents of the given node.
     """

@@ -1,12 +1,11 @@
 import os
-from typing import Dict, Any
 
-from app.core.config import settings
+from app.config import settings
 
 # Get environment from env var (default to development)
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
-def get_uvicorn_config() -> Dict[str, Any]:
+def get_uvicorn_config() -> dict[str, str | int | bool]:
     """
     Get the uvicorn configuration based on the current environment.
     

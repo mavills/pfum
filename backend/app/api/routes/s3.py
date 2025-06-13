@@ -6,8 +6,8 @@ from fastapi import APIRouter, HTTPException, Query, status
 from botocore.exceptions import ClientError
 import boto3
 
-from app.core.logger import get_logger
-from app.core.config import settings
+from app.logger import get_logger
+from app.config import settings
 
 # Set up logger
 logger = get_logger("api.s3")

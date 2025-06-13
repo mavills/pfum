@@ -1,6 +1,4 @@
-import { Edge, Node } from "@xyflow/react";
-import { CustomNode, CustomEdge } from "../../types";
-import { NodeType, InputNodeData, DynamicNodeData } from "../../types";
+import { Edge, Node, Position } from "@xyflow/react";
 import { Operator } from "../templating/operatorType";
 
 /**
@@ -8,13 +6,6 @@ import { Operator } from "../templating/operatorType";
  * and adding instance-specific data (ID, position, user values)
  */
 function createNodeExport(node: Node) {
-  const baseNode = {
-    id: node.id,
-    position: {
-      x: node.position.x,
-      y: node.position.y,
-    },
-  };
   const operator = node.data as unknown as Operator;
   return {
     id: node.id,
@@ -22,69 +13,6 @@ function createNodeExport(node: Node) {
     position: node.position,
     operator: operator,
   };
-
-  switch (node.type) {
-    case NodeType.INPUT: {
-      const inputData = node.data as unknown as InputNodeData;
-      return {
-        ...baseNode,
-        type: "input",
-        configuration: {
-          name: "CSV Input",
-          description: "Input node for CSV data",
-          category: "Input",
-          inputs: [],
-          outputs: (inputData.column_names || []).map((columnName) => ({
-            name: columnName,
-            type: "string",
-            description: `Column: ${columnName}`,
-            path: `output.${columnName}`,
-          })),
-          operations: [
-            {
-              operation: "read_csv",
-              kwargs: {
-                file_path: inputData.source_file || "",
-                columns: inputData.column_names || [],
-              },
-            },
-          ],
-        },
-        instance_data: {
-          column_names: inputData.column_names || [],
-          source_file: inputData.source_file,
-        },
-      };
-    }
-
-    case NodeType.NORMAL: {
-      const dynamicData = node.data as unknown as DynamicNodeData;
-      return {
-        ...baseNode,
-        type: "dynamic",
-        configuration: dynamicData.config, // Full configuration preserved
-        instance_data: {
-          nodeConfigId: dynamicData.nodeConfigId,
-          configName: dynamicData.configName,
-          inputValues: dynamicData.inputValues || {},
-        },
-      };
-    }
-
-    default:
-      return {
-        ...baseNode,
-        type: "unknown",
-        configuration: {
-          name: "Unknown Node",
-          description: "Unknown node type",
-          inputs: [],
-          outputs: [],
-          operations: [],
-        },
-        instance_data: {},
-      };
-  }
 }
 
 /**
@@ -100,11 +28,16 @@ function createEdgeExport(edge: Edge) {
   };
 }
 
+export function generateGraphExportJSON(nodes: Node[], edges: Edge[]): string {
+  const graphExport = generateGraphExport(nodes, edges);
+  return JSON.stringify(graphExport, null, 2);
+}
+
 /**
  * Transforms the nodes and edges data into a structured JSON configuration
  * for downstream processing and API consumption
  */
-export function generateGraphExportJSON(nodes: Node[], edges: Edge[]): string {
+export function generateGraphExport(nodes: Node[], edges: Edge[]) {
   // Process nodes with full configuration integrity
   const exportedNodes = nodes.map(createNodeExport);
 
@@ -124,5 +57,5 @@ export function generateGraphExportJSON(nodes: Node[], edges: Edge[]): string {
     edges: exportedEdges,
   };
 
-  return JSON.stringify(graphExport, null, 2);
+  return graphExport;
 }

@@ -2,7 +2,7 @@ import pytest
 import pandas as pd
 import numpy as np
 from app.api.schemas.transform import (
-    Node,
+    GraphNode,
     NodeType,
     Position,
     ConnectionHandle,
@@ -30,7 +30,7 @@ class TestDAG:
     """Test DAG-related functionality."""
 
     def test_map_node_id_to_node(self):
-        input_node = Node(
+        input_node = GraphNode(
             id="input-1",
             type=NodeType.INPUT,
             position=Position(x=0, y=0),
@@ -39,7 +39,7 @@ class TestDAG:
             outputs=[],
         )
 
-        output_node = Node(
+        output_node = GraphNode(
             id="output-1",
             type=NodeType.OUTPUT,
             position=Position(x=300, y=0),
@@ -57,7 +57,7 @@ class TestDAG:
 
     def test_select_subtree(self):
         # Define test nodes
-        input_node = Node(
+        input_node = GraphNode(
             id="input-1",
             type=NodeType.INPUT,
             position=Position(x=0, y=0),
@@ -74,7 +74,7 @@ class TestDAG:
             ],
         )
 
-        string_concat_node = Node(
+        string_concat_node = GraphNode(
             id="concat-1",
             type=NodeType.STRING_CONCAT,
             position=Position(x=150, y=0),
@@ -101,7 +101,7 @@ class TestDAG:
             ],
         )
 
-        output_node = Node(
+        output_node = GraphNode(
             id="output-1",
             type=NodeType.OUTPUT,
             position=Position(x=300, y=0),
@@ -138,7 +138,7 @@ class TestNodeTransformations:
     """Test individual node transformations."""
 
     def test_input_node(self, sample_df):
-        input_node = Node(
+        input_node = GraphNode(
             id="input-1",
             type=NodeType.INPUT,
             position=Position(x=0, y=0),
@@ -154,7 +154,7 @@ class TestNodeTransformations:
         assert len(result) == len(sample_df)
 
     def test_string_concat_node(self, sample_df):
-        input_node = Node(
+        input_node = GraphNode(
             id="input-1",
             type=NodeType.INPUT,
             position=Position(x=0, y=0),
@@ -178,7 +178,7 @@ class TestNodeTransformations:
             ],
         )
 
-        string_concat_node = Node(
+        string_concat_node = GraphNode(
             id="concat-1",
             type=NodeType.STRING_CONCAT,
             position=Position(x=150, y=0),
@@ -220,7 +220,7 @@ class TestNodeTransformations:
             }
         )
 
-        input_node = Node(
+        input_node = GraphNode(
             id="input-1",
             type=NodeType.INPUT,
             position=Position(x=0, y=0),
@@ -244,7 +244,7 @@ class TestNodeTransformations:
             ],
         )
 
-        string_concat_node = Node(
+        string_concat_node = GraphNode(
             id="concat-1",
             type=NodeType.STRING_CONCAT,
             position=Position(x=150, y=0),
@@ -278,7 +278,7 @@ class TestNodeTransformations:
 
 def test_cyclic_graph():
     """Test that cyclic graphs are detected and raise an error."""
-    input_node = Node(
+    input_node = GraphNode(
         id="node_0",
         type=NodeType.INPUT,
         position=Position(x=0, y=0),
@@ -295,7 +295,7 @@ def test_cyclic_graph():
     )
 
     # Create a cycle by making the concat node input depend on its output
-    string_concat_node = Node(
+    string_concat_node = GraphNode(
         id="node_2",
         type=NodeType.STRING_CONCAT,
         position=Position(x=150, y=0),

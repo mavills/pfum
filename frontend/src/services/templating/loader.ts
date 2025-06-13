@@ -1,42 +1,36 @@
 import { Operator } from "./operatorType";
 import { operatorPubSub } from "./pubsub";
+import { getAllOperatorsWithRetry } from "./operatorApi";
 
 /**
- * Fetches and returns the list of configuration file paths from the manifest
- * @returns Promise resolving to array of configuration file paths
+ * Fetches all operators from the remote API
+ * @returns Promise<Operator[]> - List of operators from the API
  */
-async function listOperators(): Promise<string[]> {
-  const manifestResponse = await fetch("/operators/manifest.json");
-
-  if (!manifestResponse.ok) {
-    throw new Error(`Failed to load manifest: ${manifestResponse.status}`);
-  }
-
-  const manifest = await manifestResponse.json();
-  const operatorLocations: string[] = [];
-
-  for (const operatorInfo of manifest.operators) {
-    operatorLocations.push(`/operators/${operatorInfo.file}`);
-  }
-
-  return operatorLocations;
-}
-
-async function loadRemoteOperator(configLocation: string): Promise<Operator> {
-  const configResponse = await fetch(configLocation);
-  if (!configResponse.ok) {
-    throw new Error(`Failed to load config: ${configResponse.status}`);
-  }
-  return configResponse.json();
-}
-
 export async function getAllDefaultRemoteOperators(): Promise<Operator[]> {
-  const operatorLocations = await listOperators();
-  const operators = await Promise.all(operatorLocations.map(loadRemoteOperator));
-  return operators;
+  try {
+    const operators = await getAllOperatorsWithRetry(3);
+    return operators;
+  } catch (error) {
+    console.error("❌ [LOADER] Failed to load operators from API:", error);
+    throw new Error(
+      `Failed to load operators from API: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
 }
 
+/**
+ * Initializes the default operators by fetching them from the API and loading them into the pubsub system
+ * @returns Promise<void>
+ */
 export async function initializeDefaultOperators(): Promise<void> {
-  const operators = await getAllDefaultRemoteOperators();
-  operatorPubSub.loadConfigurations(operators);
+  try {
+    const operators = await getAllDefaultRemoteOperators();
+    operatorPubSub.loadConfigurations(operators);
+  } catch (error) {
+    console.error("❌ [LOADER] Failed to initialize operators:", error);
+    // Don't throw here to prevent the app from crashing - just log the error
+    // The UI should handle the case where no operators are available
+  }
 }

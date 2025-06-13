@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from 'react';
-import { CustomNode, CustomEdge } from '../../types';
+import { Node, Edge } from '@xyflow/react';
 
 interface PreviewPanelProps {
-  nodes: CustomNode[];
-  edges: CustomEdge[];
+  nodes: Node[];
+  edges: Edge[];
   isOpen: boolean;
   onClose: () => void;
 }

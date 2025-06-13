@@ -1,11 +1,4 @@
 import { Node, Edge } from "@xyflow/react";
-import {
-  NodeType,
-  InputNodeData,
-  DynamicNodeData,
-  CustomNode,
-  CustomEdge,
-} from "../../types";
 import { Operator } from "../templating/operatorType";
 import nodePubSub from "../nodes/pubsub";
 

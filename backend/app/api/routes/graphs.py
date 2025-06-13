@@ -6,8 +6,8 @@ from app.api.schemas.graphs import (
     PreviewGraphRequest,
     PreviewGraphResponse
 )
-from app.services.graph_service import graph_service
-from app.core.logger import get_logger
+from app.services.graph_service import GraphService
+from app.logger import get_logger
 
 logger = get_logger("api.graphs")
 router = APIRouter()
@@ -30,7 +30,7 @@ async def process_graph(request: ProcessGraphRequest):
     logger.info(f"Processing graph with {len(request.graph.nodes)} nodes")
     
     try:
-        return graph_service.process_graph(request.graph)
+        return GraphService(request.graph).process_graph()
     except ValueError as e:
         logger.error(f"Graph processing error: {str(e)}")
         raise HTTPException(
@@ -62,7 +62,7 @@ async def preview_graph_execution(request: PreviewGraphRequest):
     logger.info(f"Creating preview for graph with {len(request.graph.nodes)} nodes, limit: {request.preview_limit}")
     
     try:
-        return graph_service.preview_graph(request.graph, request.preview_limit)
+        return GraphService(request.graph).preview_graph(request.preview_limit)
     except ValueError as e:
         logger.error(f"Graph preview error: {str(e)}")
         raise HTTPException(

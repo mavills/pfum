@@ -3,8 +3,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import api_router
-from app.core.config import settings
-from app.core.logger import configure_logging, get_logger
+from app.config import settings
+from app.logger import configure_logging, get_logger
 from dotenv import load_dotenv
 import os
 

@@ -90,7 +90,7 @@ NodeManualValues = Union[
 ]
 
 
-class Node(BaseModel):
+class GraphNode(BaseModel):
     """Unified model for all node types."""
 
     id: str
@@ -145,7 +145,7 @@ class TransformationConfig(BaseModel):
         description="Base path prefix where output files will be saved",
     )
 
-    nodes: List[Node]
+    nodes: List[GraphNode]
     edges: List[Edge]
 
     model_config = ConfigDict(

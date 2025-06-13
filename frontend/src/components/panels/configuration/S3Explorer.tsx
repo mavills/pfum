@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as Accordion from "@radix-ui/react-accordion";
-import { ChevronDown, FolderOpen, Search, X, Upload, Trash2, RefreshCw } from "lucide-react";
+import {
+  ChevronDown,
+  FolderOpen,
+  Search,
+  X,
+  Upload,
+  Trash2,
+  RefreshCw,
+} from "lucide-react";
 import { formatFileSize, formatDate } from "./utils";
 import DraggableNode from "./DraggableNode";
 import { operatorPubSub } from "@/services/templating/pubsub";
@@ -19,10 +27,8 @@ interface S3ExplorerProps {
 
 interface UploadedFileInfo {
   id: string; // Backend file ID
-  localName: string;
-  size: number;
-  columns: string[];
-  operator?: Operator; // Generated operator template
+  filename: string;
+  operator?: Operator;
   isUploading?: boolean;
   isGeneratingTemplate?: boolean;
   uploadError?: string;
@@ -34,7 +40,7 @@ const S3Explorer: React.FC<S3ExplorerProps> = ({ onAddInputNodeFromS3 }) => {
   const [files, setFiles] = useState<S3File[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Local files state - now with full backend integration
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFileInfo[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -47,9 +53,7 @@ const S3Explorer: React.FC<S3ExplorerProps> = ({ onAddInputNodeFromS3 }) => {
         setError(null);
 
         const response = await fetch(
-          `http://localhost:8000/api/v1/s3/list?prefix=${encodeURIComponent(
-            prefix
-          )}`
+          `http://localhost:8000/s3/list?prefix=${encodeURIComponent(prefix)}`
         );
 
         if (!response.ok) {
@@ -80,7 +84,7 @@ const S3Explorer: React.FC<S3ExplorerProps> = ({ onAddInputNodeFromS3 }) => {
       setLoading(true);
 
       const response = await fetch(
-        `http://localhost:8000/api/v1/s3/columns?file_key=${encodeURIComponent(
+        `http://localhost:8000/s3/columns?file_key=${encodeURIComponent(
           file.key
         )}`
       );
@@ -100,12 +104,14 @@ const S3Explorer: React.FC<S3ExplorerProps> = ({ onAddInputNodeFromS3 }) => {
   };
 
   // Upload file to backend
-  const uploadFileToBackend = async (file: File): Promise<UploadedFileInfo> => {
+  const createOperatorFromUploadedFile = async (
+    file: File
+  ): Promise<Operator> => {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
-    const response = await fetch('http://localhost:8000/api/v1/files/upload', {
-      method: 'POST',
+    const response = await fetch("http://localhost:8000/nodes/file", {
+      method: "POST",
       body: formData,
     });
 
@@ -114,28 +120,28 @@ const S3Explorer: React.FC<S3ExplorerProps> = ({ onAddInputNodeFromS3 }) => {
     }
 
     const uploadResult = await response.json();
-    
-    return {
-      id: uploadResult.file_id,
-      localName: uploadResult.filename,
-      size: uploadResult.size,
-      columns: uploadResult.columns,
-    };
+
+    return uploadResult;
   };
 
   // Generate operator template from uploaded file
-  const generateOperatorTemplate = async (fileInfo: UploadedFileInfo): Promise<Operator> => {
-    const response = await fetch('http://localhost:8000/api/v1/files/generate-node-template', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        file_id: fileInfo.id,
-        node_title: `CSV Input: ${fileInfo.localName}`,
-        node_description: `Input node for uploaded file: ${fileInfo.localName}`,
-      }),
-    });
+  const generateOperatorTemplate = async (
+    fileInfo: UploadedFileInfo
+  ): Promise<Operator> => {
+    const response = await fetch(
+      "http://localhost:8000/files/generate-node-template",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          file_id: fileInfo.id,
+          node_title: `CSV Input: ${fileInfo.filename}`,
+          node_description: `Input node for uploaded file: ${fileInfo.filename}`,
+        }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Template generation failed: ${response.statusText}`);
@@ -146,18 +152,20 @@ const S3Explorer: React.FC<S3ExplorerProps> = ({ onAddInputNodeFromS3 }) => {
   };
 
   // Handle local file selection and upload
-  const handleLocalFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLocalFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     // Check if file is CSV
-    if (!file.name.toLowerCase().endsWith('.csv')) {
+    if (!file.name.toLowerCase().endsWith(".csv")) {
       setError("Only CSV files are supported");
       return;
     }
 
     // Check if file is already uploaded
-    const existingFile = uploadedFiles.find(f => f.localName === file.name && f.size === file.size);
+    const existingFile = uploadedFiles.find((f) => f.filename === file.name);
     if (existingFile) {
       setError(`File "${file.name}" is already uploaded`);
       return;
@@ -166,51 +174,51 @@ const S3Explorer: React.FC<S3ExplorerProps> = ({ onAddInputNodeFromS3 }) => {
     // Create initial file info with uploading state
     const initialFileInfo: UploadedFileInfo = {
       id: `temp-${Date.now()}`,
-      localName: file.name,
-      size: file.size,
-      columns: [],
+      filename: file.name,
       isUploading: true,
     };
 
-    setUploadedFiles(prev => [...prev, initialFileInfo]);
+    setUploadedFiles((prev) => [...prev, initialFileInfo]);
     setError(null);
 
     try {
       // Upload file to backend
-      const uploadedFileInfo = await uploadFileToBackend(file);
-      
-      // Update file info with upload results
-      setUploadedFiles(prev => prev.map(f => 
-        f.id === initialFileInfo.id 
-          ? { ...uploadedFileInfo, isUploading: false, isGeneratingTemplate: true }
-          : f
-      ));
+      const operator = await createOperatorFromUploadedFile(file);
 
-      // Generate operator template
-      const operator = await generateOperatorTemplate(uploadedFileInfo);
-      
-      // Update file info with generated operator
-      setUploadedFiles(prev => prev.map(f => 
-        f.id === uploadedFileInfo.id 
-          ? { ...f, operator, isGeneratingTemplate: false }
-          : f
-      ));
+      // Update file info with upload results
+      setUploadedFiles((prev) =>
+        prev.map((f) =>
+          f.id === initialFileInfo.id
+            ? {
+                ...initialFileInfo,
+                isUploading: false,
+                operator,
+              }
+            : f
+        )
+      );
 
       // Register the operator with pubsub system
       operatorPubSub.loadConfigurations([operator]);
-      
-      console.log(`✅ Uploaded and registered operator: ${operator.title}`);
 
+      console.log(`✅ Uploaded and registered operator: ${operator.title}`);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Upload failed";
-      
+
       // Update file info with error
-      setUploadedFiles(prev => prev.map(f => 
-        f.id === initialFileInfo.id 
-          ? { ...f, isUploading: false, isGeneratingTemplate: false, uploadError: errorMessage }
-          : f
-      ));
-      
+      setUploadedFiles((prev) =>
+        prev.map((f) =>
+          f.id === initialFileInfo.id
+            ? {
+                ...f,
+                isUploading: false,
+                isGeneratingTemplate: false,
+                uploadError: errorMessage,
+              }
+            : f
+        )
+      );
+
       setError(`Failed to process "${file.name}": ${errorMessage}`);
       console.error("Error processing file:", err);
     }
@@ -223,7 +231,7 @@ const S3Explorer: React.FC<S3ExplorerProps> = ({ onAddInputNodeFromS3 }) => {
 
   // Remove uploaded file
   const removeUploadedFile = (fileId: string) => {
-    setUploadedFiles(prev => prev.filter(f => f.id !== fileId));
+    setUploadedFiles((prev) => prev.filter((f) => f.id !== fileId));
   };
 
   // Clear all uploaded files
@@ -235,31 +243,36 @@ const S3Explorer: React.FC<S3ExplorerProps> = ({ onAddInputNodeFromS3 }) => {
   const retryFileProcessing = async (fileInfo: UploadedFileInfo) => {
     if (!fileInfo.uploadError) return;
 
-    setUploadedFiles(prev => prev.map(f => 
-      f.id === fileInfo.id 
-        ? { ...f, uploadError: undefined, isGeneratingTemplate: true }
-        : f
-    ));
+    setUploadedFiles((prev) =>
+      prev.map((f) =>
+        f.id === fileInfo.id
+          ? { ...f, uploadError: undefined, isGeneratingTemplate: true }
+          : f
+      )
+    );
 
     try {
       const operator = await generateOperatorTemplate(fileInfo);
-      
-      setUploadedFiles(prev => prev.map(f => 
-        f.id === fileInfo.id 
-          ? { ...f, operator, isGeneratingTemplate: false }
-          : f
-      ));
+
+      setUploadedFiles((prev) =>
+        prev.map((f) =>
+          f.id === fileInfo.id
+            ? { ...f, operator, isGeneratingTemplate: false }
+            : f
+        )
+      );
 
       operatorPubSub.loadConfigurations([operator]);
       console.log(`✅ Retried and registered operator: ${operator.title}`);
-      
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Retry failed";
-      setUploadedFiles(prev => prev.map(f => 
-        f.id === fileInfo.id 
-          ? { ...f, isGeneratingTemplate: false, uploadError: errorMessage }
-          : f
-      ));
+      setUploadedFiles((prev) =>
+        prev.map((f) =>
+          f.id === fileInfo.id
+            ? { ...f, isGeneratingTemplate: false, uploadError: errorMessage }
+            : f
+        )
+      );
     }
   };
 
@@ -268,20 +281,22 @@ const S3Explorer: React.FC<S3ExplorerProps> = ({ onAddInputNodeFromS3 }) => {
       <Accordion.Trigger className="config-accordion-trigger">
         <FolderOpen size={16} />
         <span>File Upload</span>
-        <span className="config-node-count">({uploadedFiles.length} uploaded)</span>
+        <span className="config-node-count">
+          ({uploadedFiles.length} uploaded)
+        </span>
         <ChevronDown size={14} className="config-accordion-chevron" />
       </Accordion.Trigger>
       <Accordion.Content className="config-accordion-content">
         <div className="config-section-content">
-          
           {/* Upload Status & Controls */}
           <div className="config-status-bar">
             <div className="config-status-info">
               <span className="config-status-text">
-                {uploadedFiles.length === 0 
-                  ? "No files uploaded" 
-                  : `${uploadedFiles.filter(f => f.operator).length}/${uploadedFiles.length} templates generated`
-                }
+                {uploadedFiles.length === 0
+                  ? "No files uploaded"
+                  : `${uploadedFiles.filter((f) => f.operator).length}/${
+                      uploadedFiles.length
+                    } templates generated`}
               </span>
             </div>
             {uploadedFiles.length > 0 && (
@@ -298,7 +313,7 @@ const S3Explorer: React.FC<S3ExplorerProps> = ({ onAddInputNodeFromS3 }) => {
           {/* Local File Upload */}
           <div className="config-subsection">
             <div className="config-subsection-title">Upload CSV Files</div>
-            
+
             <input
               ref={fileInputRef}
               type="file"
@@ -306,7 +321,7 @@ const S3Explorer: React.FC<S3ExplorerProps> = ({ onAddInputNodeFromS3 }) => {
               onChange={handleLocalFileSelect}
               style={{ display: "none" }}
             />
-            
+
             <button
               onClick={() => fileInputRef.current?.click()}
               className="config-action-button"
@@ -336,7 +351,7 @@ const S3Explorer: React.FC<S3ExplorerProps> = ({ onAddInputNodeFromS3 }) => {
                   <div key={fileInfo.id} className="config-file-upload-item">
                     <div className="config-file-upload-header">
                       <div className="config-file-upload-name">
-                        {fileInfo.localName}
+                        {fileInfo.filename}
                         <span className="config-file-upload-size">
                           ({formatFileSize(fileInfo.size)})
                         </span>
@@ -349,21 +364,21 @@ const S3Explorer: React.FC<S3ExplorerProps> = ({ onAddInputNodeFromS3 }) => {
                         <X size={12} />
                       </button>
                     </div>
-                    
+
                     {fileInfo.isUploading && (
                       <div className="config-loading">
                         <div className="config-loading-spinner"></div>
                         <span>Uploading...</span>
                       </div>
                     )}
-                    
+
                     {fileInfo.isGeneratingTemplate && (
                       <div className="config-loading">
                         <div className="config-loading-spinner"></div>
                         <span>Generating template...</span>
                       </div>
                     )}
-                    
+
                     {fileInfo.uploadError && (
                       <div className="config-file-upload-error">
                         <p>{fileInfo.uploadError}</p>
@@ -377,11 +392,16 @@ const S3Explorer: React.FC<S3ExplorerProps> = ({ onAddInputNodeFromS3 }) => {
                         </button>
                       </div>
                     )}
-                    
+
                     {fileInfo.operator && (
                       <div className="config-file-upload-success">
                         <div className="config-file-upload-columns">
-                          <span>Columns: {fileInfo.columns.join(", ")}</span>
+                          <span>
+                            Columns:{" "}
+                            {fileInfo.operator.inputs
+                              .map((input) => input.name)
+                              .join(", ")}
+                          </span>
                         </div>
                         <DraggableNode operator={fileInfo.operator} />
                       </div>
@@ -395,7 +415,7 @@ const S3Explorer: React.FC<S3ExplorerProps> = ({ onAddInputNodeFromS3 }) => {
           {/* S3 Files Section */}
           <div className="config-subsection">
             <div className="config-subsection-title">S3 Files (Legacy)</div>
-            
+
             {/* Search input */}
             <div className="config-search-container">
               <div className="config-search-input-wrapper">

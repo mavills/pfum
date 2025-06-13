@@ -12,13 +12,13 @@ from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 
 from app.api.schemas.transform import (
-    Node,
+    GraphNode,
     NodeType,
     TransformDataResponse,
     TransformRequest,
 )
-from app.core.logger import get_logger
-from app.core.config import settings
+from app.logger import get_logger
+from app.config import settings
 from app.core.dag import map_node_id_to_node, select_subtree, topological_sort
 
 # Load environment variables
@@ -224,7 +224,7 @@ async def transform_data(request: TransformRequest):
 
 
 def apply_transformation(
-    nodes: list[Node],
+    nodes: list[GraphNode],
     input_data: pd.DataFrame,
     evaluate_node_id: Optional[str] = None,
 ) -> pd.DataFrame:

@@ -1,6 +1,3 @@
-import os
-from typing import Dict, Any, Optional, List
-
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -21,8 +18,10 @@ class Settings(BaseSettings):
     DEBUG: bool = Field(default=False)
 
     # API Configuration
-    API_PREFIX: str = "/api"
-    API_V1_PREFIX: str = "/v1"
+    # API_PREFIX: str = "/api"
+    API_PREFIX: str = ""
+    # API_V1_PREFIX: str = "/v1"
+    API_V1_PREFIX: str = ""
 
     # Server Configuration
     HOST: str = "0.0.0.0"
@@ -31,10 +30,10 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "info"
 
     # CORS Configuration
-    CORS_ORIGINS: List[str] = ["*"]
+    CORS_ORIGINS: list[str] = ["*"]
     CORS_ALLOW_CREDENTIALS: bool = True
-    CORS_ALLOW_METHODS: List[str] = ["*"]
-    CORS_ALLOW_HEADERS: List[str] = ["*"]
+    CORS_ALLOW_METHODS: list[str] = ["*"]
+    CORS_ALLOW_HEADERS: list[str] = ["*"]
 
     # AWS Configuration
     AWS_REGION: str = "eu-west-1"
@@ -50,10 +49,7 @@ class Settings(BaseSettings):
         return self.ENVIRONMENT.lower() == "production"
 
     model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=True,
-        extra="ignore"
+        env_file=".env", env_file_encoding="utf-8", case_sensitive=True, extra="ignore"
     )
 
 
